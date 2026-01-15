@@ -12,7 +12,7 @@
 * Repository การพัฒนา (GitHub, GitLab)
 * หน้าร้านค้า / บริจาค
 * เว็บไซต์อย่างเป็นทางการ
-* เนื้อหาแบบฝัง
+* เนื้อหาวิดีโอแบบฝังตัว
 
 ---
 
@@ -22,19 +22,22 @@
 socials: {
   url: string;
   type: string;
+  label?: string;
 }[];
 ```
 
 ### Fields
 
-| Field            | Type         | Required | Description                                 |
-| ---------------- | ------------ | -------- | ------------------------------------------- |
-| `socials[].url`  | string (URI) | ✓        | URL เป้าหมาย                                |
-| `socials[].type` | string       | ✓        | คีย์แพลตฟอร์มที่ใช้กำหนดไอคอนและสี          |
+| Field             | Type         | Required | Description                                        |
+| ----------------- | ------------ | -------- | -------------------------------------------------- |
+| `socials[].url`   | string (URI) | ✓        | URL เป้าหมาย                                       |
+| `socials[].type`  | string       | ✓        | คีย์แพลตฟอร์มที่ใช้กำหนดไอคอนและสี                 |
+| `socials[].label` | string       |          | ป้ายกำกับที่กำหนดเอง (สำหรับ `website` และ `iframe`) |
 
 * `socials` เป็น **ตัวเลือก** ในการตั้งค่า instance
 * Launcher จะจับคู่ไอคอน + สีจาก `type` โดยอัตโนมัติ
 * ประเภทที่ไม่รู้จักจะใช้การจัดรูปแบบเริ่มต้น
+* `label` รองรับเฉพาะประเภท `website` และ `iframe` เท่านั้น
 
 ---
 
@@ -140,16 +143,23 @@ socials: {
 
 ### General & Media
 
-| Platform    | Type Keys        | Color          |
-| ----------- | ---------------- | -------------- |
-| เว็บไซต์    | `web`, `website` | Emerald        |
-| Embed       | `iframe`         | Violet (Modal) |
+| Platform         | Type Keys        | Color          | ป้ายกำหนดเอง |
+| ---------------- | ---------------- | -------------- | ------------ |
+| เว็บไซต์         | `web`, `website` | Emerald        | ✓            |
+| วิดีโอฝังตัว    | `iframe`         | Violet (Modal) | ✓            |
 
 **ตัวอย่าง:**
 ```json
 { "type": "website", "url": "https://furi.moe" }
-{ "type": "iframe", "url": "https://docs.example.com" }
+{ "type": "website", "url": "https://wiki.example.com", "label": "Wiki" }
+{ "type": "iframe", "url": "https://www.youtube.com/embed/dQw4w9WgXcQ" }
+{ "type": "iframe", "url": "https://www.youtube.com/embed/dQw4w9WgXcQ", "label": "ตัวอย่าง" }
 ```
+
+**หมายเหตุ:**
+* ประเภท `iframe` ใช้โดยเฉพาะสำหรับ **วิดีโอฝังตัว** หรือ **ลิงก์วิดีโอโดยตรง** เท่านั้น (YouTube embeds, Vimeo ฯลฯ)
+* ฟิลด์ `label` ช่วยให้คุณปรับแต่งข้อความที่แสดงสำหรับลิงก์ `website` และ `iframe` ได้
+* หากไม่ระบุ label launcher จะแสดงป้ายกำกับเริ่มต้นตามประเภท
 
 ---
 
@@ -180,7 +190,7 @@ socials: {
 | Chat     | Telegram        | `telegram`, `tg`                         | Sky Blue       |
 | Support  | บริจาค          | `patreon`, `kofi`, `support`             | Coral          |
 | General  | เว็บไซต์        | `web`, `website`                         | Emerald        |
-| Media    | Embed           | `iframe`                                 | Violet (Modal) |
+| Media    | วิดีโอฝังตัว   | `iframe`                                 | Violet (Modal) |
 | Default  | อื่นๆ           | *any*                                    | Violet         |
 
 ---
@@ -217,6 +227,16 @@ socials: {
     {
       "type": "website",
       "url": "https://furi.moe"
+    },
+    {
+      "type": "website",
+      "url": "https://wiki.alicemagic.com",
+      "label": "Wiki"
+    },
+    {
+      "type": "iframe",
+      "url": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      "label": "ตัวอย่าง"
     },
     {
       "type": "telegram",
