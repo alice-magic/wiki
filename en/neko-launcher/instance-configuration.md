@@ -151,16 +151,7 @@ Use the `tags` array to categorize your instance by gameplay type, features, or 
 * `Towny` - Towny plugin/mod
 
 ---
-tags": [
-    "Survival",
-    "Modded",
-    "RPG",
-    "Magic",
-    "Quests",
-    "Community"
-  ],
 
-  "
 ## Ignored Files
 
 Use the `ignored` array to exclude files/folders from sync or packaging:
@@ -238,7 +229,13 @@ Common use cases:
     "crash-reports",
     "screenshots"
   ],
-
+  "tags": [
+    "Survival",
+    "Modded",
+    "RPG",
+    "Magic",
+    "Community"
+  ],
   "readonly": false,
   "gameArgs": [
     "--quickPlayMultiplayer=play.furi.moe"

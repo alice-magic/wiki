@@ -223,7 +223,6 @@ Object `metadata` รองรับฟิลด์กำหนดเองร�
     "Modded",
     "RPG",
     "Magic",
-    "Quests",
     "Community"
   ],
 
