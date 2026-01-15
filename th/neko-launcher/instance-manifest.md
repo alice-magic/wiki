@@ -85,7 +85,7 @@ const fs = require('fs');
 
 const hash = crypto.createHash('sha1');
 hash.update(fs.readFileSync('file.jar'));
-console.log(hash.digest('hex'));
+// console.log(hash.digest('hex'));
 ```
 
 ---
