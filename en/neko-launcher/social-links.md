@@ -12,7 +12,7 @@ Social links appear in the instance details and provide quick access to:
 * Development repositories (GitHub, GitLab)
 * Store / Donation pages
 * Official websites
-* Embedded content
+* Embedded video content
 
 ---
 
@@ -22,19 +22,22 @@ Social links appear in the instance details and provide quick access to:
 socials: {
   url: string;
   type: string;
+  label?: string;
 }[];
 ```
 
 ### Fields
 
-| Field            | Type         | Required | Description                                 |
-| ---------------- | ------------ | -------- | ------------------------------------------- |
-| `socials[].url`  | string (URI) | ✓        | Target URL                                  |
-| `socials[].type` | string       | ✓        | Platform key used to determine icon & color |
+| Field             | Type         | Required | Description                                 |
+| ----------------- | ------------ | -------- | ------------------------------------------- |
+| `socials[].url`   | string (URI) | ✓        | Target URL                                  |
+| `socials[].type`  | string       | ✓        | Platform key used to determine icon & color |
+| `socials[].label` | string       |          | Custom label (for `website` and `iframe`)   |
 
 * `socials` is **optional** in instance configuration
 * Launcher automatically maps icon + color from `type`
 * Unknown types use default styling
+* `label` is only supported for `website` and `iframe` types
 
 ---
 
@@ -140,16 +143,23 @@ socials: {
 
 ### General & Media
 
-| Platform | Type Keys        | Color          |
-| -------- | ---------------- | -------------- |
-| Website  | `web`, `website` | Emerald        |
-| Embed    | `iframe`         | Violet (Modal) |
+| Platform      | Type Keys        | Color          | Custom Label |
+| ------------- | ---------------- | -------------- | ------------ |
+| Website       | `web`, `website` | Emerald        | ✓            |
+| Video Embed   | `iframe`         | Violet (Modal) | ✓            |
 
 **Example:**
 ```json
 { "type": "website", "url": "https://furi.moe" }
-{ "type": "iframe", "url": "https://docs.example.com" }
+{ "type": "website", "url": "https://wiki.example.com", "label": "Wiki" }
+{ "type": "iframe", "url": "https://www.youtube.com/embed/dQw4w9WgXcQ" }
+{ "type": "iframe", "url": "https://www.youtube.com/embed/dQw4w9WgXcQ", "label": "Trailer" }
 ```
+
+**Note:** 
+* The `iframe` type is specifically for **video embeds** or **direct video links** only (YouTube embeds, Vimeo, etc.)
+* The `label` field allows you to customize the display text for `website` and `iframe` links
+* If label is not provided, the launcher will show a default label based on the type
 
 ---
 
@@ -180,7 +190,7 @@ Any unrecognized type will use default violet styling:
 | Chat     | Telegram     | `telegram`, `tg`                         | Sky Blue       |
 | Support  | Donation     | `patreon`, `kofi`, `support`             | Coral          |
 | General  | Website      | `web`, `website`                         | Emerald        |
-| Media    | Embed        | `iframe`                                 | Violet (Modal) |
+| Media    | Video Embed  | `iframe`                                 | Violet (Modal) |
 | Default  | Other        | *any*                                    | Violet         |
 
 ---
@@ -217,6 +227,16 @@ Any unrecognized type will use default violet styling:
     {
       "type": "website",
       "url": "https://furi.moe"
+    },
+    {
+      "type": "website",
+      "url": "https://launcher.furi.moe/wiki",
+      "label": "Wiki"
+    },
+    {
+      "type": "iframe",
+      "url": "https://www.youtube.com/embed/dQw4w9WgXcQ",
+      "label": "Trailer"
     },
     {
       "type": "telegram",
