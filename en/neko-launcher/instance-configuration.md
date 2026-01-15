@@ -31,6 +31,7 @@ Schema for configuring an **Neko Launcher Minecraft instance**.
 | `minecraft.loader.enable` | boolean      | Enable or disable mod loader.                                |
 | `metadata.wallpaper`      | string (URI) | Wallpaper image URL.                                         |
 | `metadata.[localized]`    | string       | Localized fields such as `th_displayName`, `th_description`. |
+| `tags`                    | string[]     | Tags categorizing the instance type/features.                |
 | `ignored`                 | string[]     | Files or folders ignored during launch/packaging.            |
 | `readonly`                | boolean      | Whether the instance is read-only.                           |
 | `gameArgs`                | string[]     | Extra JVM / game arguments.                                  |
@@ -84,6 +85,82 @@ Localized fields use the pattern `{locale}_{field}` where:
 
 ---
 
+## Tags
+
+Use the `tags` array to categorize your instance by gameplay type, features, or style:
+
+```json
+"tags": [
+  "Survival",
+  "Modded",
+  "RPG",
+  "Community"
+]
+```
+
+### Supported Tags
+
+**Game Modes:**
+* `Survival` - Classic survival gameplay
+* `SMP` - Survival Multiplayer
+* `Creative` - Creative mode focused
+* `Hardcore` - Hardcore difficulty
+* `Adventure` - Adventure mode gameplay
+* `Spectator` - Spectator mode enabled
+
+**Server Types:**
+* `Skyblock` - Skyblock gameplay
+* `Prison` - Prison server style
+* `Factions` - Factions warfare
+* `Earth` - Earth map servers
+* `Anarchy` - Anarchy gameplay
+* `Lifesteal` - Lifesteal mechanics
+* `Pixelmon` - Pixelmon mod
+* `Cobblemon` - Cobblemon mod
+
+**Minigames:**
+* `Minigame` - General minigames
+* `BedWars` - BedWars minigame
+* `SkyWars` - SkyWars minigame
+* `Parkour` - Parkour challenges
+* `PvP` - Player vs Player focused
+
+**Gameplay Style:**
+* `RPG` - Role-playing game elements
+* `MMO` - Massively multiplayer online
+* `Magic` - Magic/spells systems
+* `Dungeons` - Dungeon exploration
+* `Quests` - Quest systems
+* `Lore` - Story/lore focused
+
+**Technical:**
+* `Modded` - Includes mods
+* `Vanilla` - Vanilla Minecraft
+* `Crossplay` - Bedrock/Java crossplay
+* `Voice Chat` - Voice chat integration
+* `Custom Items` - Custom items/resources
+* `Tech` - Technology/automation mods
+* `Redstone` - Redstone focused
+
+**Community:**
+* `Economy` - Economy systems
+* `Roleplay` - Roleplay oriented
+* `Community` - Community focused
+* `Events` - Regular events
+* `Building` - Building focused
+* `Towny` - Towny plugin/mod
+
+---
+tags": [
+    "Survival",
+    "Modded",
+    "RPG",
+    "Magic",
+    "Quests",
+    "Community"
+  ],
+
+  "
 ## Ignored Files
 
 Use the `ignored` array to exclude files/folders from sync or packaging:
