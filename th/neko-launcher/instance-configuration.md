@@ -1,8 +1,8 @@
-# สคีมาตั้งค่า Instance (ภาษาไทย)
+# Instance Configuration Schema
 
-สคีมานี้ใช้สำหรับตั้งค่า **Minecraft instance ใน Neko Launcher**
+Schema นี้ใช้สำหรับตั้งค่า **Minecraft instance ใน Neko Launcher**
 
-* **$comment**: สคีมาสำหรับตั้งค่า Minecraft instance
+* **$comment**: Schema สำหรับตั้งค่า Minecraft instance
 * **title**: `Neko Launcher Instance Schema`
 * **type**: `object`
 

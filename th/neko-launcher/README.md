@@ -1,4 +1,4 @@
-# เอกสาร Neko Launcher (ภาษาไทย)
+# เอกสาร Neko Launcher
 
 ยินดีต้อนรับสู่เอกสาร **Neko Launcher** คู่มือนี้ครอบคลุมโครงสร้าง JSON, ตัวเลือกการตั้งค่า และรายละเอียดทางเทคนิคสำหรับการสร้างและจัดการ Minecraft instance ด้วย Neko Launcher
 
