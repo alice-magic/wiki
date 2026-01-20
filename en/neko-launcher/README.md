@@ -1,4 +1,4 @@
-# Neko Launcher Documentation (English)
+# Neko Launcher Documentation
 
 Welcome to the **Neko Launcher** documentation. This guide covers the JSON schemas, configuration options, and technical details for creating and managing Minecraft instances with Neko Launcher.
 
