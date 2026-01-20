@@ -1,8 +1,8 @@
-# Instance Configuration Schema
+# Instance Configuration Schema (English)
 
-Schema for configuring an **Neko Launcher Minecraft instance**.
+This schema is used to configure a **Minecraft instance in Neko Launcher**.
 
-* **$comment**: Schema for Neko Launcher Minecraft instance configuration
+* **$comment**: Schema for Minecraft instance configuration
 * **title**: `Neko Launcher Instance Schema`
 * **type**: `object`
 
@@ -20,7 +20,7 @@ Schema for configuring an **Neko Launcher Minecraft instance**.
 
 ---
 
-## Properties
+## Additional Fields
 
 | Field                     | Type         | Description                                                  |
 | ------------------------- | ------------ | ------------------------------------------------------------ |
@@ -32,16 +32,14 @@ Schema for configuring an **Neko Launcher Minecraft instance**.
 | `metadata.wallpaper`      | string (URI) | Wallpaper image URL.                                         |
 | `metadata.[localized]`    | string       | Localized fields such as `th_displayName`, `th_description`. |
 | `tags`                    | string[]     | Tags categorizing the instance type/features.                |
-| `ignored`                 | string[]     | Files or folders ignored during launch/packaging.            |
+| `ignored`                 | string[]     | Files or folders ignored during sync/packaging.              |
 | `readonly`                | boolean      | Whether the instance is read-only.                           |
 | `gameArgs`                | string[]     | Extra JVM / game arguments.                                  |
 | `socials`                 | array        | Social / community / store links for the instance.           |
 
 ---
 
-## Minecraft Version Configuration
-
-The `minecraft` object defines the game version and mod loader settings:
+## Minecraft Configuration Example
 
 ```json
 "minecraft": {
@@ -68,26 +66,20 @@ The `minecraft` object defines the game version and mod loader settings:
 
 ## Metadata & Localization
 
-The `metadata` object supports custom fields including localized content:
-
 ```json
 "metadata": {
   "wallpaper": "https://cdn.example.com/wallpaper.webp",
-  "th_displayName": "ชื่อภาษาไทย",
-  "th_description": "คำอธิบายภาษาไทย",
-  "customField": "any custom metadata"
+  "th_displayName": "Thai name",
+  "th_description": "Thai description",
+  "customField": "Additional info"
 }
 ```
 
-Localized fields use the pattern `{locale}_{field}` where:
-* `locale` is a language code (e.g., `th`, `ja`, `zh`)
-* `field` is the property being localized (typically `displayName` or `description`)
+Localized fields use the pattern `{locale}_{field}` such as `th_displayName`, `ja_description`.
 
 ---
 
-## Tags
-
-Use the `tags` array to categorize your instance by gameplay type, features, or style:
+## Using Tags
 
 ```json
 "tags": [
@@ -98,63 +90,11 @@ Use the `tags` array to categorize your instance by gameplay type, features, or 
 ]
 ```
 
-### Supported Tags
-
-**Game Modes:**
-* `Survival` - Classic survival gameplay
-* `SMP` - Survival Multiplayer
-* `Creative` - Creative mode focused
-* `Hardcore` - Hardcore difficulty
-* `Adventure` - Adventure mode gameplay
-* `Spectator` - Spectator mode enabled
-
-**Server Types:**
-* `Skyblock` - Skyblock gameplay
-* `Prison` - Prison server style
-* `Factions` - Factions warfare
-* `Earth` - Earth map servers
-* `Anarchy` - Anarchy gameplay
-* `Lifesteal` - Lifesteal mechanics
-* `Pixelmon` - Pixelmon mod
-* `Cobblemon` - Cobblemon mod
-
-**Minigames:**
-* `Minigame` - General minigames
-* `BedWars` - BedWars minigame
-* `SkyWars` - SkyWars minigame
-* `Parkour` - Parkour challenges
-* `PvP` - Player vs Player focused
-
-**Gameplay Style:**
-* `RPG` - Role-playing game elements
-* `MMO` - Massively multiplayer online
-* `Magic` - Magic/spells systems
-* `Dungeons` - Dungeon exploration
-* `Quests` - Quest systems
-* `Lore` - Story/lore focused
-
-**Technical:**
-* `Modded` - Includes mods
-* `Vanilla` - Vanilla Minecraft
-* `Crossplay` - Bedrock/Java crossplay
-* `Voice Chat` - Voice chat integration
-* `Custom Items` - Custom items/resources
-* `Tech` - Technology/automation mods
-* `Redstone` - Redstone focused
-
-**Community:**
-* `Economy` - Economy systems
-* `Roleplay` - Roleplay oriented
-* `Community` - Community focused
-* `Events` - Regular events
-* `Building` - Building focused
-* `Towny` - Towny plugin/mod
+See the supported tags list below.
 
 ---
 
-## Ignored Files
-
-Use the `ignored` array to exclude files/folders from sync or packaging:
+## Ignored Files/Folders
 
 ```json
 "ignored": [
@@ -166,16 +106,11 @@ Use the `ignored` array to exclude files/folders from sync or packaging:
 ]
 ```
 
-Supports:
-* Exact paths: `logs`, `screenshots`
-* Glob patterns: `*.log`, `crash-reports/*.txt`
-* Nested paths: `saves/world/region`
+Supports exact paths, glob patterns, and nested paths.
 
 ---
 
 ## Game Arguments
-
-Add custom JVM or game arguments via the `gameArgs` array:
 
 ```json
 "gameArgs": [
@@ -185,68 +120,16 @@ Add custom JVM or game arguments via the `gameArgs` array:
 ]
 ```
 
-Common use cases:
-* Auto-connect to servers: `--quickPlayMultiplayer=server.address`
-* Memory allocation: `-Xmx4G`, `-Xms2G`
-* JVM flags: `-XX:+UseG1GC`
-
 ---
 
 ## Complete Example
 
-```json
-{
-  "$schema": "https://cdn.furimoe.com/schema/neko-launcher.json",
-  "name": "alice-magic",
-  "displayName": "Alice Magic: Furiora's World",
-  "description": "A modded Minecraft experience with adventure.",
-  "icon": "https://cdn.masuru.in.th/HamF2Hsoirx4K9DL.webp",
-  "onlineMode": true,
-
-  "minecraft": {
-    "version": "1.21.8",
-    "loader": {
-      "type": "fabric",
-      "build": "0.17.2",
-      "enable": true
-    }
-  },
-
-  "metadata": {
-    "th_displayName": "อลิซ เมจิก: โลกของฟูริโอร่า",
-    "th_description": "ประสบการณ์มอด Minecraft ที่เต็มไปด้วยการผจญภัย",
-    "wallpaper": "https://cdn.masuru.in.th/2025-11-18_13.webp"
-  },
-
-  "socials": [
-    { "type": "github", "url": "https://github.com/aomkoyo" },
-    { "type": "store", "url": "https://shop.furi.moe" },
-    { "type": "support", "url": "https://furipay.me/aomkoyo" }
-  ],
-
-  "ignored": [
-    "logs",
-    "crash-reports",
-    "screenshots"
-  ],
-  "tags": [
-    "Survival",
-    "Modded",
-    "RPG",
-    "Magic",
-    "Community"
-  ],
-  "readonly": false,
-  "gameArgs": [
-    "--quickPlayMultiplayer=play.furi.moe"
-  ]
-}
-```
+See the full example in the English section below.
 
 ---
 
 ## See Also
 
-* [Instance Manifest](instance-manifest.md) - Define downloadable files for your instance
-* [Social Links](social-links.md) - Configure community and social links
+* [Instance Manifest](instance-manifest.md) - Define downloadable files
+* [Social Links](social-links.md) - Configure community links
 * [Back to Documentation Index](README.md)

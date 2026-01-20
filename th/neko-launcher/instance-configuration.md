@@ -1,4 +1,142 @@
-# Instance Configuration Schema
+# สคีมาตั้งค่า Instance (ภาษาไทย)
+
+สคีมานี้ใช้สำหรับตั้งค่า **Minecraft instance ใน Neko Launcher**
+
+* **$comment**: สคีมาสำหรับตั้งค่า Minecraft instance
+* **title**: `Neko Launcher Instance Schema`
+* **type**: `object`
+
+---
+
+## ฟิลด์ที่จำเป็น
+
+| ฟิลด์         | ชนิดข้อมูล | คำอธิบาย                                                                 |
+| ------------- | ---------- | ------------------------------------------------------------------------ |
+| `name`        | string     | รหัสเฉพาะของ instance (ตัวอักษรเล็ก, ตัวเลข, ขีดกลาง, ขีดล่าง)        |
+| `displayName` | string     | ชื่อที่แสดงของ instance                                                 |
+| `description` | string     | คำอธิบายสั้น ๆ ของ instance                                             |
+| `onlineMode`  | boolean    | ต้องการตรวจสอบตัวตนออนไลน์หรือไม่                                       |
+| `minecraft`   | object     | การตั้งค่าเวอร์ชัน Minecraft และ mod loader                             |
+
+---
+
+## ฟิลด์เพิ่มเติม
+
+| ฟิลด์                     | ชนิดข้อมูล   | คำอธิบาย                                         |
+| ------------------------- | ------------ | ------------------------------------------------ |
+| `icon`                    | string (URI) | URL รูปไอคอนของ instance                        |
+| `minecraft.version`       | string       | เวอร์ชัน Minecraft เช่น `1.21.8`, `latest`      |
+| `minecraft.loader.type`   | string       | ประเภท loader (`fabric`, `forge`, `quilt`, `neoforge`) |
+| `minecraft.loader.build`  | string       | เวอร์ชันของ loader                              |
+| `minecraft.loader.enable` | boolean      | เปิด/ปิด mod loader                              |
+| `metadata.wallpaper`      | string (URI) | URL รูป wallpaper                                |
+| `metadata.[localized]`    | string       | ฟิลด์แปลภาษา เช่น `th_displayName`, `th_description` |
+| `tags`                    | string[]     | แท็กสำหรับจัดหมวดหมู่ instance                  |
+| `ignored`                 | string[]     | ไฟล์หรือโฟลเดอร์ที่ไม่ต้อง sync/packaging       |
+| `readonly`                | boolean      | กำหนดให้อ่านอย่างเดียว                          |
+| `gameArgs`                | string[]     | อาร์กิวเมนต์ JVM/เกมเพิ่มเติม                   |
+| `socials`                 | array        | ลิงก์โซเชียล/ชุมชน/ร้านค้า                     |
+
+---
+
+## ตัวอย่างการตั้งค่า Minecraft
+
+```json
+"minecraft": {
+  "version": "1.21.8",
+  "loader": {
+    "type": "fabric",
+    "build": "0.17.2",
+    "enable": true
+  }
+}
+```
+
+### ฟิลด์เวอร์ชัน
+* ใช้เวอร์ชันเฉพาะ เช่น `1.21.8`, `1.20.1`
+* หรือใช้ `latest` สำหรับเวอร์ชันล่าสุด
+
+### ประเภท Loader
+* `fabric` - Fabric Loader
+* `forge` - Forge Mod Loader
+* `quilt` - Quilt Loader
+* `neoforge` - NeoForge Loader
+
+---
+
+## ข้อมูล metadata และการแปลภาษา
+
+```json
+"metadata": {
+  "wallpaper": "https://cdn.example.com/wallpaper.webp",
+  "th_displayName": "ชื่อภาษาไทย",
+  "th_description": "คำอธิบายภาษาไทย",
+  "customField": "ข้อมูลเพิ่มเติม"
+}
+```
+
+ฟิลด์แปลภาษาใช้รูปแบบ `{locale}_{field}` เช่น `th_displayName`, `ja_description`
+
+---
+
+## การใช้ tags
+
+```json
+"tags": [
+  "Survival",
+  "Modded",
+  "RPG",
+  "Community"
+]
+```
+
+ดูรายการ tag ที่รองรับในเนื้อหาภาษาอังกฤษด้านล่าง
+
+---
+
+## การตั้งค่า ignored
+
+```json
+"ignored": [
+  "logs",
+  "crash-reports",
+  "screenshots",
+  "*.log",
+  "saves/*/playerdata"
+]
+```
+
+รองรับ path ตรง, glob pattern, และ path ซ้อน
+
+---
+
+## การตั้งค่า gameArgs
+
+```json
+"gameArgs": [
+  "--quickPlayMultiplayer=play.furi.moe",
+  "-Xmx4G",
+  "-XX:+UseG1GC"
+]
+```
+
+---
+
+## ตัวอย่างเต็ม
+
+ดูตัวอย่างเต็มในเนื้อหาภาษาอังกฤษด้านล่าง
+
+---
+
+## ดูเพิ่มเติม
+
+* [ไฟล์ Manifest](instance-manifest.md) - กำหนดไฟล์ดาวน์โหลด
+* [ลิงก์โซเชียล](social-links.md) - ตั้งค่าชุมชน
+* [กลับสู่หน้ารวมเอกสาร](README.md)
+
+---
+
+# Instance Configuration Schema (English)
 
 Schema สำหรับการตั้งค่า **Neko Launcher Minecraft instance**
 
