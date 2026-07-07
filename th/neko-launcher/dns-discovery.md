@@ -35,7 +35,7 @@ sequenceDiagram
     alt primary missing
         Launcher->>DNS: TXT _alicemagiclauncher.<domain>
     end
-    DNS-->>Launcher: v=2 record (key=value;...)
+    DNS-->>Launcher: v=2 record, key=value pairs
     Launcher->>Launcher: Parse v2 → instanceUrl, manifestUrl
     Launcher->>CDN: GET instanceUrl (X-UUID, online headers)
     CDN-->>Launcher: instance.json
