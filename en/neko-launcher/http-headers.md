@@ -13,6 +13,31 @@ Every HTTP request from the launcher includes headers identifying the player and
 * **Anti-Leech** - Prevent unauthorized redistribution
 * **Player Verification** - Confirm legitimate launcher usage
 
+### Request Flow
+
+The launcher attaches identity headers to every request; your server reads
+them to decide whether to serve the file.
+
+```mermaid
+sequenceDiagram
+    participant L as Neko Launcher
+    participant S as Your Server / CDN
+
+    Note over L: Player authenticated<br/>with Microsoft/Mojang
+    L->>S: GET /instance.json<br/>x-uuid: 8518f0b2-…<br/>online: true
+
+    alt online header missing or "false"
+        S-->>L: 403 Forbidden<br/>Online mode required
+    else UUID malformed
+        S-->>L: 400 Bad Request<br/>Invalid UUID
+    else UUID not whitelisted
+        S-->>L: 403 Forbidden<br/>Not whitelisted
+    else authorized
+        S->>S: Log access (hashed UUID)
+        S-->>L: 200 OK<br/>instance.json
+    end
+```
+
 ---
 
 ## Request Headers
