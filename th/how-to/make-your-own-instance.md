@@ -1,76 +1,156 @@
-# คู่มือการสร้าง Instance ของคุณเอง
+# สร้าง Instance ของคุณเอง
 
-การสร้าง Instance ของคุณเองนั้นง่ายและไม่ซับซ้อน เพียงทำตามขั้นตอนดังนี้:
+Neko Launcher ให้คุณเปลี่ยน Minecraft modpack ใดก็ได้ให้กลายเป็น **instance** ที่แชร์ได้และผูกกับเซิร์ฟเวอร์ของคุณ ผู้เล่นค้นพบมันได้ผ่าน IP ดาวน์โหลดไฟล์ที่คุณส่งมอบให้ตรงเป๊ะ และถูกซิงค์ให้อัปเดตอยู่เสมอโดยอัตโนมัติ คู่มือนี้จะพาคุณผ่านตัวช่วย **Create New** ที่มีในตัวตั้งแต่ต้นจนจบ
 
-#### 1. ไปที่หน้าค้นหาเซิร์ฟเวอร์
-คลิกปุ่ม **ค้นหาเซิร์ฟเวอร์** ที่อยู่บริเวณมุมขวาบนของ Launcher
+ขั้นตอนทั้งหมดมีประมาณ 12 ขั้นตอน และแบ่งออกเป็นห้าช่วง ได้แก่ สร้าง instance, นำเข้า `.mrpack` ของคุณ, กำหนดสิทธิ์การแก้ไข, ตั้งค่าการค้นพบผ่าน DNS และเปิดใช้งานจริง
 
-![ขั้นตอนที่ 1 กดปุ่มค้นหา](https://cdn.furimoe.com/images/create-your-own-instance-step-1.png)
+## 🗺️ ภาพรวมของขั้นตอน
 
-#### 2. เริ่มสร้างอินสแตนซ์ใหม่
-คลิกปุ่ม `+ อินสแตนซ์ใหม่` ซึ่งจะอยู่ที่มุมล่างขวาของหน้าต่างค้นหา
+```mermaid
+flowchart TD
+    A[Open Search Server] --> B[+ New Instance]
+    B --> C[Choose Create New]
 
-![ขั้นตอนที่ 2 ปุ่มสร้างอินสแตนซ์ใหม่](https://cdn.furimoe.com/images/create-your-own-instance-step-2.png)
+    subgraph Create
+        C --> D[Fill in name, IP,<br/>icon & wallpaper]
+    end
 
-#### 3. เลือกประเภทการสร้าง
-ให้เลือก **สร้างใหม่** (หรือเลือก *เชื่อมต่อกับอินสแตนซ์ที่มีอยู่* หากคุณมีข้อมูลอยู่แล้ว)
+    subgraph Import
+        D --> E[Drop in .mrpack file]
+    end
 
-![ขั้นตอนที่ 3 เลือกเมนูสร้างใหม่](https://cdn.furimoe.com/images/create-your-own-instance-step-3.png)
+    subgraph Permissions
+        E --> F[Pick player-editable<br/>files - optional]
+    end
 
-#### 4. กรอกข้อมูลอินสแตนซ์
-กรอกรายละเอียดที่จำเป็นสำหรับการสร้าง Instance ดังนี้:
-![ขั้นตอนที่ 4 กรอกรายละเอียด](https://cdn.furimoe.com/images/create-your-own-instance-step-4.png)
-- **ชื่ออินสแตนซ์:** ตั้งชื่อที่ต้องการให้แสดง
-- **IP Address:** ที่อยู่ IP สำหรับเชื่อมต่อ (เช่น `play.furi.moe`)
-- **Icon และ Wallpaper:** อัปโหลดรูปภาพเพื่อตกแต่งอินสแตนซ์ของคุณ
+    F --> G[Review & Create Instance]
+    G --> H[System builds instance]
 
-> **แนะนำ:** หลังจากกรอกข้อมูลครบถ้วน ให้ตรวจสอบความถูกต้องอีกครั้ง แล้วกด **ถัดไป**
+    subgraph DNS
+        H --> I[Add TXT record<br/>manual or Cloudflare auto]
+        I --> J[Confirm DNS]
+    end
 
-#### 5. นำเข้าไฟล์ Modpack
-ลากไฟล์ `.mrpack` ที่ต้องการใช้งานมาวางในช่องที่กำหนด
-> *Tip: ไฟล์ `.mrpack` สามารถได้จากการ Export Modpack ใน [Modrinth App](https://modrinth.com/app)*
+    subgraph Ready
+        J --> K[Status: Ready to Use]
+        K --> L[Play!]
+    end
+```
 
-![ขั้นตอนที่ 5 อัปโหลดไฟล์ mrpack](https://cdn.furimoe.com/images/create-your-own-instance-step-5.png)
+## 📦 ช่วงที่ 1 — สร้าง instance
 
-#### 6. กำหนดสิทธิ์การแก้ไขไฟล์ (Optional)
-เลือกไฟล์ที่คุณอนุญาตให้ผู้เล่นสามารถแก้ไขเองได้ (เช่น Resource Pack หรือ Config ต่างๆ) หากไม่ต้องการกำหนดให้ข้ามขั้นตอนนี้ได้เลย
+### 1. เปิดหน้าค้นหาเซิร์ฟเวอร์
 
-![ขั้นตอนที่ 6 กำหนดสิทธิ์ไฟล์](https://cdn.furimoe.com/images/create-your-own-instance-step-6.png)
+คลิกปุ่ม **Search Server** ที่มุมขวาบนของ Launcher
 
-#### 7. ยืนยันการสร้าง
-กดปุ่ม **ถัดไป** ตรวจสอบข้อมูลภาพรวมอีกครั้ง จากนั้นกด **สร้างอินสแตนซ์**
+![Step 1: Click Search Button](https://cdn.neko-launcher.com/images/create-your-own-instance-step-1.png)
 
-![ขั้นตอนที่ 7 ยืนยันการสร้าง](https://cdn.furimoe.com/images/create-your-own-instance-step-7.png)
+### 2. เริ่มสร้าง instance ใหม่
 
-#### 8. รอระบบดำเนินการ
-ระบบกำลังทำการสร้าง Instance โปรดรอสักครู่...
+ในหน้าต่างค้นหา ให้คลิกปุ่ม **`+ New Instance`** ที่มุมล่างขวา
 
-![ขั้นตอนที่ 8 รอระบบประมวลผล](https://cdn.furimoe.com/images/create-your-own-instance-step-8.png)
+![Step 2: New Instance Button](https://cdn.neko-launcher.com/images/create-your-own-instance-step-2.png)
 
-#### 9. ตั้งค่า DNS (TXT Record)
-เมื่อสร้างเสร็จแล้ว ระบบจะให้คุณตั้งค่า TXT Record สำหรับโดเมน
-> **ทางเลือก:** คุณสามารถตั้งค่าเอง (Manual) หรือถ้าใช้ Cloudflare สามารถกดปุ่ม **ตั้งค่าอัตโนมัติ** ได้เลย
-> *หมายเหตุ: หลังจากตั้งค่าแล้ว อาจต้องรอ DNS อัปเดตประมาณ 5-10 นาที*
+### 3. เลือกประเภทการสร้าง
 
-![ขั้นตอนที่ 9 ตั้งค่า DNS](https://cdn.furimoe.com/images/create-your-own-instance-step-9.png)
+เลือก **Create New** (หากคุณมีข้อมูล instance โฮสต์ไว้ที่ไหนสักแห่งแล้ว ให้เลือก **Connect to Existing Instance** แทน)
 
-#### 10. ยืนยัน DNS (กรณีใช้ Cloudflare)
-หากเลือกตั้งค่าด้วย Cloudflare ระบบจะขอให้กดยืนยันการตั้งค่า DNS อีกครั้ง
+![Step 3: Select Create New Menu](https://cdn.neko-launcher.com/images/create-your-own-instance-step-3.png)
 
-![ขั้นตอนที่ 10 ยืนยัน Cloudflare](https://cdn.furimoe.com/images/create-your-own-instance-step-10.png)
+### 4. กรอกรายละเอียดของ instance
 
-#### 11. เสร็จสิ้น! พร้อมใช้งาน
-เมื่อการตั้งค่า DNS สมบูรณ์ สถานะจะเปลี่ยนเป็น **"พร้อมใช้งาน"**
-> หากยังไม่ขึ้นพร้อมใช้งาน อาจต้องรอการอัปเดต DNS จากผู้ให้บริการโดเมนของคุณสักครู่
+![Step 4: Fill in Details](https://cdn.neko-launcher.com/images/create-your-own-instance-step-4.png)
 
-![ขั้นตอนที่ 11 สถานะพร้อมใช้งาน](https://cdn.furimoe.com/images/create-your-own-instance-step-11.png)
+- **Instance Name** — ชื่อที่จะแสดงให้ผู้เล่นเห็น
+- **IP Address** — โดเมนที่ผู้เล่นใช้เชื่อมต่อ (เช่น `play.furi.moe`) ซึ่งเป็นที่เดียวกับที่การค้นพบผ่าน DNS ผูกอยู่ด้วย ดังนั้นให้ใช้โดเมนที่คุณควบคุมได้
+- **Icon และ Wallpaper** — รูปภาพเสริม (ไม่บังคับ) เพื่อสร้างแบรนด์ให้ instance ของคุณ
 
-#### 12. เริ่มเล่นได้เลย
-ตอนนี้คุณสามารถกดเล่นบน Instance ที่สร้างขึ้นใหม่ได้แล้ว!
+> **เคล็ดลับ:** ตรวจสอบทุกอย่างให้ถี่ถ้วนอีกครั้ง แล้วคลิก **Next**
 
-![ขั้นตอนที่ 12 หน้าจอพร้อมเล่น](https://cdn.furimoe.com/images/create-your-own-instance-step-12.png)
+## 🎒 ช่วงที่ 2 — นำเข้า modpack ของคุณ
+
+### 5. วางไฟล์ `.mrpack` ของคุณ
+
+ลากและวางไฟล์ `.mrpack` ที่คุณต้องการส่งมอบลงในช่องวางไฟล์
+
+> คุณสามารถสร้างไฟล์ `.mrpack` ได้โดยการ export modpack จาก [Modrinth App](https://modrinth.com/app) Neko Launcher จะอ่านแพ็กและเปลี่ยนให้เป็น manifest ของไฟล์ (แต่ละไฟล์มี URL, ขนาด และค่าแฮช **SHA-1**) ที่ผู้เล่นจะดาวน์โหลดและตรวจสอบความถูกต้อง
+
+![Step 5: Upload mrpack File](https://cdn.neko-launcher.com/images/create-your-own-instance-step-5.png)
+
+## 🔓 ช่วงที่ 3 — กำหนดสิทธิ์การแก้ไข
+
+### 6. เลือกไฟล์ที่ผู้เล่นแก้ไขได้ (ไม่บังคับ)
+
+ทำเครื่องหมายว่าผู้เล่นได้รับอนุญาตให้เปลี่ยนแปลงไฟล์ใดได้เองในเครื่อง — เช่น resource pack, การตั้งค่าปุ่มลัด หรือ options ส่วนไฟล์อื่นทั้งหมดจะยังคงถูกจัดการและถูกกู้คืนให้ตรงกับ manifest ของคุณในการซิงค์ครั้งถัดไป ข้ามขั้นตอนนี้ได้หากคุณไม่ต้องการใช้
+
+![Step 6: Set File Permissions](https://cdn.neko-launcher.com/images/create-your-own-instance-step-6.png)
+
+> เบื้องหลังนั้น สิ่งเหล่านี้จะกลายเป็น path ที่ `ignored` ของ instance เพื่อไม่ให้ไฟล์ที่ถูกจัดการถูกเขียนทับโดยไคลเอนต์แบบเงียบ ๆ
+
+## 🚀 ช่วงที่ 4 — สร้างและตั้งค่า DNS
+
+### 7. ตรวจสอบและสร้าง
+
+คลิก **Next** ตรวจสอบสรุปข้อมูล จากนั้นคลิก **Create Instance**
+
+![Step 7: Confirm Creation](https://cdn.neko-launcher.com/images/create-your-own-instance-step-7.png)
+
+### 8. รอการประมวลผล
+
+Launcher จะสร้าง instance และอัปโหลด config กับ manifest ของมัน โปรดรอสักครู่
+
+![Step 8: Wait for Processing](https://cdn.neko-launcher.com/images/create-your-own-instance-step-8.png)
+
+### 9. เพิ่ม DNS TXT record
+
+Neko Launcher ค้นพบ instance ผ่าน **TXT record** บนโดเมนของคุณ เมื่อการสร้างเสร็จสิ้น ตัวช่วยจะแสดง record ที่คุณต้องเพิ่ม
+
+คุณมีสองทางเลือก:
+
+- **Manual** — คัดลอก record แล้วเพิ่มที่ผู้ให้บริการ DNS ของคุณ
+- **Auto Configure (Cloudflare)** — หากโดเมนของคุณอยู่บน Cloudflare ให้คลิก **Auto Configure** แล้ว Launcher จะเขียน record ให้คุณเอง
+
+![Step 9: Configure DNS](https://cdn.neko-launcher.com/images/create-your-own-instance-step-9.png)
+
+Launcher จะค้นหา `_nekolauncher.<your-domain>` (และถอยไปใช้ `_alicemagiclauncher.<your-domain>` เป็นตัวสำรอง) record แบบ **v2** สมัยใหม่คือคู่ `key=value` ที่คั่นด้วย `;` โดยสองตัวที่สำคัญที่สุดคือ `instanceUrl` และ `manifestUrl`:
+
+```text
+_nekolauncher.play.furi.moe.  IN  TXT  "v=2;instanceUrl=https://cdn.example.com/play/instance.json;manifestUrl=https://cdn.example.com/play/manifest.json"
+```
+
+> `settings=` และ `manifest=` ถูกรองรับให้ใช้เป็นชื่อแทนของ `instanceUrl=` และ `manifestUrl=` ได้ แต่แนะนำให้ใช้ชื่อมาตรฐานข้างต้น ดู [DNS Discovery](../neko-launcher/dns-discovery.md) สำหรับทุกคีย์ที่รองรับและรูปแบบ pipe แบบเดิม
+
+> **หมายเหตุ:** การเปลี่ยนแปลง DNS อาจใช้เวลา 5–10 นาทีในการแพร่กระจาย ขึ้นอยู่กับผู้ให้บริการของคุณ
+
+### 10. ยืนยัน record ของ Cloudflare
+
+หากคุณใช้ **Auto Configure** ตัวช่วยจะขอให้คุณยืนยัน record ที่มันสร้างขึ้นก่อนดำเนินการต่อ
+
+![Step 10: Confirm Cloudflare](https://cdn.neko-launcher.com/images/create-your-own-instance-step-10.png)
+
+## ✅ ช่วงที่ 5 — เปิดใช้งานจริง
+
+### 11. รอสถานะ "Ready to Use"
+
+เมื่อ TXT record ถูก resolve ได้แล้ว สถานะจะเปลี่ยนเป็น **Ready to Use** หากยังอยู่ในสถานะรออยู่ ให้เวลา DNS แพร่กระจายอีกสักครู่
+
+![Step 11: Ready Status](https://cdn.neko-launcher.com/images/create-your-own-instance-step-11.png)
+
+### 12. เริ่มเล่นได้เลย
+
+กด **Play** บน instance ที่คุณเพิ่งสร้างขึ้น แล้วลุยได้เลย!
+
+![Step 12: Ready to Play Screen](https://cdn.neko-launcher.com/images/create-your-own-instance-step-12.png)
 
 ---
-- ขอให้สนุกกับการเล่น Minecraft บนอินสแตนซ์ที่คุณสร้างขึ้นมาเอง!
-- หากคุณพบปัญหาหรือมีคำถามเพิ่มเติม สามารถติดต่อทีมสนับสนุนของเราได้เสมอ!
-- ขอบคุณที่ใช้ Neko Launcher!
+
+เท่านี้ก็เสร็จแล้ว — ขอให้สนุกกับ instance ที่คุณปรับแต่งเอง และหากเจอปัญหาใด ๆ ติดต่อเราได้ที่ [Discord](https://alice-discord.furi.moe) ขอบคุณที่ใช้ Neko Launcher!
+
+## ดูเพิ่มเติม
+
+- [Join with an IP Address](./join-with-ip-address.md) — วิธีที่ผู้เล่นเชื่อมต่อกับ instance ของคุณ
+- [DNS Discovery](../neko-launcher/dns-discovery.md) — เอกสารอ้างอิง TXT record ฉบับเต็ม (คีย์, ชื่อแทน, รูปแบบเดิม)
+- [Instance Configuration](../neko-launcher/instance-configuration.md) — สคีมาของ `instance.json`
+- [Instance Manifest](../neko-launcher/instance-manifest.md) — file manifest และการแฮชแบบ SHA-1
+- [HTTP Headers](../neko-launcher/http-headers.md) — เฮดเดอร์ `X-UUID` / `online` สำหรับควบคุมการเข้าถึง
+- [Announcements](../neko-launcher/announcement-instance.md) — ส่งประกาศถึงผู้เล่นใน instance ของคุณ
