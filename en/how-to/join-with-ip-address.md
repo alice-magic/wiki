@@ -1,81 +1,87 @@
 # How to Join a Server with an IP Address
 
-Can't find a server through the normal browse list? You can connect directly by typing its **IP address** (or domain) into the search bar. Neko Launcher takes it from there — resolving the server's DNS records, pulling down the instance config, and dropping you straight into the game.
+Neko Launcher can add a server from nothing more than its address. Type `play.example.com` into the search box and the launcher works out what it is.
 
-## 🔎 How direct-join works
+---
 
-When you enter an address, the launcher looks up special DNS **TXT records** on that domain to discover how to configure the instance. It queries two names, in order:
-
-1. `_nekolauncher.<domain>` (primary)
-2. `_alicemagiclauncher.<domain>` (fallback)
-
-If a record is found, the launcher reads the `instanceUrl` and `manifestUrl` it points to, downloads the instance definition, and prepares everything automatically — no manual setup required. (Server operators: see [Make Your Own Instance](make-your-own-instance.md) for how to publish those records.)
-
-## 🕹️ Join flow
+## What happens when you search
 
 ```mermaid
-flowchart LR
-    A[Open Neko Launcher] --> B[Log in]
-    B --> C[Open Server Search]
-    C --> D[Enter IP / domain]
-    D --> E[Launcher resolves DNS<br/>+ loads instance]
-    E --> F[Click Play]
+flowchart TD
+    A[Type an address or name] --> B{Known to the Neko API?}
+    B -- yes --> C[Instance card from the API]
+    B -- no --> D{DNS TXT record at _nekolauncher.domain?}
+    D -- yes --> E[Self-hosted instance card]
+    D -- no --> F[Plain server ping]
+    C --> G[Play]
+    E --> G
+    F --> H[Shows the server but nothing to install]
 ```
 
-## Steps to join
+1. **Neko API first** — if the text matches an instance name or an invite code, the launcher shows that instance and whether your account may install it.
+2. **DNS TXT record** — otherwise it looks up `_nekolauncher.<domain>` (and the legacy `_alicemagiclauncher.<domain>`). A record there points at the instance's settings and manifest. See [DNS discovery](../neko-launcher/dns-discovery.md).
+3. **Plain ping** — with neither, the launcher pings the Minecraft server and shows its MOTD and player count, but there is no modpack to install.
+
+Addresses that look like an IP (`203.0.113.7:25565`) skip the API step.
+
+---
+
+## Steps
 
 ### Step 1 — Open Neko Launcher
 
-Launch the Neko Launcher application on your computer.
-
 ![Neko Launcher Step 1](https://cdn.neko-launcher.com/images/neko-launcher-step-1.png)
 
-### Step 2 — Log in
+### Step 2 — Sign in
 
-Click **Login** and sign in with your account. For online servers you'll want a real Microsoft/Xbox account — the launcher sends your account status with each request so operators can gate access to authenticated players.
+Use a Microsoft account that owns Minecraft. Some servers require it (online mode); an offline account will see the server but cannot play it.
 
 ![Neko Launcher Step 2](https://cdn.neko-launcher.com/images/neko-launcher-step-2.png?dark=https://cdn.neko-launcher.com/images/neko-launcher-step-2-dark.png)
 
-### Step 3 — Open the server search page
+### Step 3 — Open the search box
 
-Find the search entry point in the top-right corner of the main window.
+Click **Search server** at the top of the window.
 
 ![Neko Launcher Step 3](https://cdn.neko-launcher.com/images/neko-launcher-step-3.png)
 
-### Step 4 — Enter the IP address
+### Step 4 — Enter the address
 
-Type the server's address (for example, `play.furi.moe`) into the search field. The launcher resolves its DNS records and loads the matching instance.
+Type the domain or IP the owner gave you and wait for the card to appear. A green border means the instance was found and you may install it; yellow means found but locked for your account; red means blocked or online-mode only.
 
 ![Neko Launcher Step 4](https://cdn.neko-launcher.com/images/neko-launcher-step-4.png)
 
-### Step 5 — Click Play
+### Step 5 — Play
 
-Press **Play** (or **Join**) to launch the game and connect to the server.
+Click the card or the play button. The instance is added to your sidebar and the download starts.
 
 ![Neko Launcher Step 5](https://cdn.neko-launcher.com/images/neko-launcher-step-5.png)
 
-## Example address
+---
 
-```text
-play.furi.moe
+## Example
+
+`play.furi.moe` has a TXT record at `_nekolauncher.play.furi.moe`:
+
+```
+v=2;ip=play.furi.moe;settings=https://example.com/instance.json;manifest=https://example.com/manifest.json
 ```
 
-Both a bare IP and a domain work, as long as the domain publishes the Neko Launcher TXT records described above.
+Typing `play.furi.moe` installs the modpack described by those two files and connects to `play.furi.moe`.
 
-## 🛠️ Troubleshooting
+---
 
-If the server won't load or you hit an error:
+## Troubleshooting
 
-- **Make sure you're logged in.** Online servers may reject requests from unauthenticated (offline) accounts.
-- **Double-check the address.** A typo means no DNS records are found.
-- **Confirm the server is running** and reachable from your network.
-- **Check your internet connection.** DNS lookups and config downloads both need network access.
-- **Try again from another network or a VPN** if the server is region-restricted.
-- **Ask the server administrator** whether their Neko Launcher DNS records are published correctly if nothing loads — the domain needs a `_nekolauncher` (or `_alicemagiclauncher`) TXT record pointing at a valid `instanceUrl`.
+| Problem | Cause and fix |
+|---|---|
+| Card says *Instance not found*, only a server ping | No TXT record for that domain. Ask the owner for the exact address, an invite link, or the instance name. |
+| Card is yellow | The instance exists but your account is not on its whitelist. Apply if the owner takes applications. |
+| Card is red | Blocked by the platform, or the server needs a Microsoft account and you are on an offline one. |
+| Download fails after the card | The settings or manifest URL in the TXT record is unreachable. The owner should test both with `curl`. |
+| Wrong modpack for a domain you own | DNS caches for 60 seconds inside the launcher and for the record's TTL at the resolver. Wait, then search again. |
 
-> 📌 **Tip:** If a domain doesn't auto-configure, it likely isn't set up for Neko Launcher yet. Server owners can add support by following [Make Your Own Instance](make-your-own-instance.md).
+## See also
 
-## See Also
-
-- [Make Your Own Instance](make-your-own-instance.md) — publish DNS records and host your own server instance
-- [How-To Guides](README.md) — back to the how-to index
+- [DNS discovery](../neko-launcher/dns-discovery.md)
+- [Deep links](../neko-launcher/deep-links.md)
+- [Apply to a server](apply-to-a-server.md)
