@@ -1,260 +1,111 @@
-# DNS-based Instance Discovery
+# DNS Discovery
 
-Neko Launcher can discover and install an instance from a **DNS TXT record**. Instead of handing players a config URL, you attach the instance details to a domain you control — and players install it just by typing that domain (or IP) into the launcher.
-
-This is the recommended way to distribute a public modpack or server pack: change the underlying URLs any time, and every player picks up the update on their next launch without you re-sharing anything.
+A self-hosted instance is found through a **DNS TXT record**. Players type your domain into the launcher; the launcher reads the record, fetches your configuration and manifest, and installs the modpack. Change the files or the URLs at any time and every player picks it up on their next launch.
 
 ---
 
-## Why use it
-
-- 🔎 **Auto-detection** — players discover your instance by domain, no config URL to copy-paste.
-- 🔗 **Server integration** — bind a Minecraft server address to its launcher instance in one place.
-- ♻️ **Painless updates** — swap the config/manifest URLs behind the record; links you shared never go stale.
-
----
-
-## How discovery works
-
-When a player enters a domain, the launcher queries DNS for two TXT record names, in order:
-
-1. `_nekolauncher.<domain>` — **primary**
-2. `_alicemagiclauncher.<domain>` — **fallback** (queried only if the primary is missing)
-
-The first record that parses wins. Here is the full flow from input to install:
+## How it works
 
 ```mermaid
 sequenceDiagram
-    actor Player
-    participant Launcher
-    participant DNS
-    participant CDN as Config / Manifest Host
-
-    Player->>Launcher: Enter domain or IP
-    Launcher->>DNS: TXT _nekolauncher.<domain>
-    alt primary missing
-        Launcher->>DNS: TXT _alicemagiclauncher.<domain>
-    end
-    DNS-->>Launcher: v=2 record, key=value pairs
-    Launcher->>Launcher: Parse v2 → instanceUrl, manifestUrl
-    Launcher->>CDN: GET instanceUrl (X-UUID, online headers)
-    CDN-->>Launcher: instance.json
-    Launcher->>CDN: GET manifestUrl (X-UUID, online headers)
-    CDN-->>Launcher: manifest.json (SHA-1 file list)
-    Launcher-->>Player: Show instance details
-    Player->>Launcher: Confirm install
-    Launcher->>CDN: Download files, verify SHA-1
+    participant P as Player
+    participant L as Launcher
+    participant D as DNS
+    participant H as Your host
+    P->>L: types play.example.com
+    L->>D: TXT _nekolauncher.play.example.com
+    D-->>L: v=2 ip=… settings=… manifest=…
+    L->>H: GET settings URL
+    L->>H: HEAD manifest URL
+    H-->>L: instance.json, 200
+    L-->>P: instance card, Play
+    P->>L: Play
+    L->>H: GET manifest URL and files
 ```
 
-> The launcher sends `X-UUID` (the player's hyphenated Minecraft UUID) and `online` (`"true"` for a real Xbox/Microsoft account, otherwise `"false"`) on the config, manifest, and file requests. Server operators can use these to gate access — see [HTTP Headers](http-headers.md).
+The launcher tries `_nekolauncher.<domain>` first and the legacy `_alicemagiclauncher.<domain>` second. Results are cached for 60 seconds inside the launcher.
 
----
+## The TXT record (v2)
 
-## TXT record format (v2)
+One string of `key=value` pairs separated by `;`:
 
-The v2 value is a **semicolon-delimited list of `key=value` pairs**. Keys are matched case-insensitively.
-
-```text
-_nekolauncher.<subdomain>  TXT  "v=2;ip=<server>;instanceUrl=<config_url>;manifestUrl=<manifest_url>;update=<timestamp>"
+```
+v=2;ip=play.example.com;settings=https://cdn.example.com/instance.json;manifest=https://cdn.example.com/manifest.json
 ```
 
-### Keys
+| Key | Required | Meaning |
+|---|---|---|
+| `v` | yes | `2`. |
+| `ip` | yes | Address the game connects to (`host` or `host:port`). Also pinged for the MOTD and player count. |
+| `settings` (alias `instanceUrl`) | yes | URL of the instance configuration, [schema v2](instance-configuration.md). |
+| `manifest` (alias `manifestUrl`) | yes | URL of the manifest, [schema v2](instance-manifest.md). |
+| `name` | no | Display name override. |
+| `iconUrl`, `backgroundUrl`, `discordUrl` | no | Presentation overrides. |
+| `minecraftVersion`, `loaderType`, `loaderBuild`, `version` | no | Overrides; normally taken from the configuration. |
+| `readonly`, `hideIp` | no | `true`/`false`. `hideIp` hides the address in the launcher UI. |
+| `update` | no | Any value you change to bust caches (for example a timestamp). |
 
-| Key            | Required | Description                                                        | Example                                   |
-| -------------- | :------: | ------------------------------------------------------------------ | ----------------------------------------- |
-| `v`            |    ✅     | Format version — must be `2`                                       | `2`                                       |
-| `ip`           |    ✅     | Minecraft server address                                           | `play.furi.moe`                           |
-| `instanceUrl`  |    ✅     | URL to the instance config JSON (`instance.json`)                  | `https://files.catbox.moe/9y5o9r.json`    |
-| `manifestUrl`  |    ✅     | URL to the manifest JSON (`manifest.json`)                         | `https://files.catbox.moe/esias3.json`    |
-| `update`       |    ➖     | Unix timestamp in **milliseconds** — bump it to signal an update   | `1768293879377`                           |
-| `name`         |    ➖     | Display name shown before the config loads                         | `Alice Magic`                             |
-| `version`      |    ➖     | Instance version label                                             | `1.4.0`                                   |
-| `minecraftVersion` | ➖  | Minecraft version hint                                             | `1.21.8`                                  |
-| `loaderType`   |    ➖     | `fabric` / `forge` / `quilt` / `neoforge`                          | `fabric`                                  |
-| `loaderBuild`  |    ➖     | Loader build/version                                               | `0.17.2`                                  |
-| `iconUrl`      |    ➖     | Instance icon URL                                                  | `https://cdn.example.com/icon.png`        |
-| `backgroundUrl`|    ➖     | Background image URL                                               | `https://cdn.example.com/bg.png`          |
-| `discordUrl`   |    ➖     | Discord invite                                                     | `https://discord.gg/…`                    |
-| `readonly`     |    ➖     | `true`/`false` — lock the instance from local edits               | `false`                                   |
-| `hideIp`       |    ➖     | `true`/`false` — hide the server IP in the UI                     | `false`                                   |
-
-> **Key aliases:** `settings` is accepted as an alias for `instanceUrl`, and `manifest` for `manifestUrl`. Older records using `settings=`/`manifest=` still work — but `instanceUrl`/`manifestUrl` are the canonical names, so prefer them for new records.
+Keys are case-insensitive. Unknown keys are ignored.
 
 ### Legacy pipe format
 
-An older **pipe-delimited** format is still parsed for backward compatibility:
+Older records are still read:
 
-```text
-ip|instanceUrl|manifestUrl|iconUrl|backgroundUrl|discordUrl|version|name|loaderType|loaderBuild|readonly|hideIp|minecraftVersion
+```
+ip|settingsUrl|manifestUrl|iconUrl|backgroundUrl|discordUrl|version|name|loaderType|loaderBuild|readonly|hideIp|minecraftVersion
 ```
 
-Use the `v=2` key/value format for anything new — it's readable, order-independent, and lets you omit optional fields.
+Prefer v2; it is easier to extend and to read.
 
----
+## Examples
 
-## Setup examples
+Root domain `example.com` with the game on `play.example.com`:
 
-### Root domain
-
-**Domain:** `furi.moe` · **Server:** `play.furi.moe`
-
-```text
-Name:  _nekolauncher
-Type:  TXT
-Value: "v=2;ip=play.furi.moe;instanceUrl=https://files.catbox.moe/9y5o9r.json;manifestUrl=https://files.catbox.moe/esias3.json;update=1768293879377"
+```
+_nekolauncher.example.com   TXT   "v=2;ip=play.example.com;settings=https://cdn.example.com/instance.json;manifest=https://cdn.example.com/manifest.json"
 ```
 
-Players discover it by entering `furi.moe`.
-
-### Subdomain
-
-**Domain:** `minecraft.example.com` · **Server:** `mc.example.com`
-
-```text
-Name:  _nekolauncher.minecraft
-Type:  TXT
-Value: "v=2;ip=mc.example.com;instanceUrl=https://cdn.example.com/mc/instance.json;manifestUrl=https://cdn.example.com/mc/manifest.json;update=1768293879377"
-```
-
-Players discover it by entering `minecraft.example.com`.
-
----
+Players type `example.com`. If they should type `play.example.com`, put the record at `_nekolauncher.play.example.com` instead.
 
 ## The files behind the URLs
 
-`instanceUrl` and `manifestUrl` must point at valid, publicly reachable JSON over **HTTPS**.
+Both URLs must be reachable over HTTPS without cookies. Each may be the bare document or the API envelope `{ "code": 200, "message": "OK", "data": … }`. The launcher sends the player's identity headers with every request, so your host can gate access; see [HTTP headers](http-headers.md).
 
-### Instance config (`instanceUrl`)
+## Provider notes
 
-A minimal `instance.json`. See [Instance Configuration](instance-configuration.md) for every field.
+- **TTL**: 300 seconds or less while you are setting up.
+- **Quoting**: most providers want the value in double quotes; keep it under 255 characters or let the provider split it (the launcher joins the parts).
+- **Cloudflare**: type `TXT`, name `_nekolauncher.play` (for `play.example.com`), content the record above, proxy status is irrelevant for TXT.
+- The launcher's Create wizard can add the record through the Cloudflare API when you paste an API token.
 
-```json
-{
-  "$schema": "https://cdn.neko-launcher.com/schema/neko-launcher.json",
-  "name": "alice-magic",
-  "displayName": "Alice Magic: Furiora's World",
-  "description": "A modded Minecraft experience",
-  "onlineMode": true,
-  "minecraft": {
-    "version": "1.21.8",
-    "loader": {
-      "type": "fabric",
-      "build": "0.17.2",
-      "enable": true
-    }
-  }
-}
-```
-
-### Instance manifest (`manifestUrl`)
-
-A JSON **array** of files. Each entry needs `path`, `url`, `size`, and a **SHA-1** `hash`. See [Instance Manifest](instance-manifest.md).
-
-```json
-[
-  {
-    "path": "mods/example-mod.jar",
-    "url": "https://cdn.example.com/mods/example.jar",
-    "size": 1234567,
-    "hash": "2ef7bde608ce5404e97d5f042f95f89f1c232871"
-  }
-]
-```
-
----
-
-## DNS provider setup
-
-The steps are identical everywhere — a `TXT` record named `_nekolauncher` (or `_nekolauncher.<subdomain>`) whose content is the quoted v2 string.
-
-| Provider          | Where                    | Record name to enter                          |
-| ----------------- | ------------------------ | --------------------------------------------- |
-| **Cloudflare**    | DNS → Add record → `TXT` | `_nekolauncher` or `_nekolauncher.<subdomain>`|
-| **Route 53 (AWS)**| Hosted zone → Create record → `TXT` | `_nekolauncher`                    |
-| **Google Cloud DNS** | Zone → Add record set → `TXT` | `_nekolauncher`                       |
-
-**Content / value** (same for all):
-
-```text
-"v=2;ip=play.furi.moe;instanceUrl=https://files.catbox.moe/9y5o9r.json;manifestUrl=https://files.catbox.moe/esias3.json;update=1768293879377"
-```
-
----
-
-## Testing & validation
-
-### Read the TXT record
+## Testing
 
 ```bash
 # Linux / macOS
-dig +short _nekolauncher.furi.moe TXT
+dig +short TXT _nekolauncher.play.example.com
+
+# Windows
+nslookup -type=TXT _nekolauncher.play.example.com
 ```
 
-```text
-:: Windows
-nslookup -type=TXT _nekolauncher.furi.moe
-```
-
-Expected:
-
-```text
-_nekolauncher.furi.moe. 300 IN TXT "v=2;ip=play.furi.moe;instanceUrl=https://files.catbox.moe/9y5o9r.json;manifestUrl=https://files.catbox.moe/esias3.json;update=1768293879377"
-```
-
-### Confirm the URLs resolve
+Then check both URLs:
 
 ```bash
-curl -I https://files.catbox.moe/9y5o9r.json
-curl -I https://files.catbox.moe/esias3.json
+curl -s https://cdn.example.com/instance.json | head -c 300
+curl -sI https://cdn.example.com/manifest.json | head -1
 ```
-
-Both should return `200 OK` with a JSON content type.
-
----
-
-## Best practices
-
-**DNS**
-- Use a low TTL (300–600s) while setting up so changes propagate quickly; raise it (3600s+) once stable.
-- Serve every URL over **HTTPS** — HTTP is not accepted.
-- Bump `update` (ms timestamp) whenever the config or manifest changes so clients know to refresh.
-
-**URL management**
-- Put config and manifest behind a CDN for reliability and speed.
-- Keep both files on the same domain where practical.
-- Send correct CORS and content-type headers.
-
-**Security**
-- HTTPS only.
-- Gate access with [HTTP header verification](http-headers.md) using `X-UUID` / `online`.
-- Rate-limit and monitor your config/manifest endpoints.
-
----
 
 ## Troubleshooting
 
-**Record not found**
-- Confirm the name is exactly `_nekolauncher` (or `_nekolauncher.<subdomain>`), including the leading underscore.
-- Remember the launcher also tries `_alicemagiclauncher.<domain>` — either name works.
-- Allow time for DNS propagation and test against multiple resolvers.
+| Symptom | Cause |
+|---|---|
+| Launcher shows only a server ping | No TXT record found at either prefix, or the record does not contain `ip=` / `v=2`. |
+| Card appears, Play fails with *Failed to resolve instance DNS records* | `settings` or `manifest` missing from the record. |
+| Card appears, download fails | A URL returned a non-200 status or invalid JSON. |
+| Old files keep coming back | Manifest still lists them; update the manifest, or add the paths to `ignored`. |
+| Changes not visible | Resolver TTL and the launcher's 60-second cache; change `update=` to force a refresh. |
 
-**Invalid format**
-- Use `key=value` pairs separated by `;`, with no spaces around the semicolons.
-- Wrap the whole value in quotes.
-- Include the required keys: `v`, `ip`, and `instanceUrl` + `manifestUrl` (or their `settings`/`manifest` aliases).
+## See also
 
-**URLs won't load**
-- Verify HTTPS and that the files open in a browser.
-- Check CORS and content-type headers.
-- Confirm the config `$schema` and manifest structure are valid (see the linked reference pages).
-
----
-
-## See Also
-
-- [Instance Configuration](instance-configuration.md) — the `instance.json` schema
-- [Instance Manifest](instance-manifest.md) — the `manifest.json` file list and SHA-1 hashing
-- [HTTP Headers](http-headers.md) — `X-UUID` / `online` access control
-- [Announcements](announcement-instance.md) — publishing in-launcher announcements
-- [Social Links](social-links.md) — attaching community links to an instance
-- [Back to Documentation Index](README.md)
+- [Create your own instance](../how-to/make-your-own-instance.md)
+- [Join with an IP address](../how-to/join-with-ip-address.md)

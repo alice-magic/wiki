@@ -1,156 +1,160 @@
 # Create Your Own Instance
 
-Neko Launcher lets you turn any Minecraft modpack into a shareable, server-locked **instance**: players discover it by IP, download exactly the files you ship, and get kept in sync automatically. This guide walks through the built-in **Create New** wizard from start to finish.
+An **instance** is your server's modpack as the launcher sees it: a description plus a list of files. There are two ways to publish one.
 
-The whole flow takes about 12 steps and breaks down into five phases: create the instance, import your `.mrpack`, set edit permissions, wire up DNS discovery, and go live.
+| Route | Best for | What you need |
+|---|---|---|
+| **Neko Dashboard** (recommended) | Anyone running a server for other players | A free account at [neko-launcher.com/dashboard](https://neko-launcher.com/dashboard) |
+| **Self-hosted with DNS** | Owners who already host files and control a domain | Any HTTPS file host and a DNS TXT record |
 
-## 🗺️ The flow at a glance
+Both produce the same result for players: they search your server, press Play, and stay in sync.
 
 ```mermaid
 flowchart TD
-    A[Open Search Server] --> B[+ New Instance]
-    B --> C[Choose Create New]
-
-    subgraph Create
-        C --> D[Fill in name, IP,<br/>icon & wallpaper]
-    end
-
-    subgraph Import
-        D --> E[Drop in .mrpack file]
-    end
-
-    subgraph Permissions
-        E --> F[Pick player-editable<br/>files - optional]
-    end
-
-    F --> G[Review & Create Instance]
-    G --> H[System builds instance]
-
-    subgraph DNS
-        H --> I[Add TXT record<br/>manual or Cloudflare auto]
-        I --> J[Confirm DNS]
-    end
-
-    subgraph Ready
-        J --> K[Status: Ready to Use]
-        K --> L[Play!]
-    end
+    A[Modpack .mrpack or a mods folder] --> B{How to publish?}
+    B -- Dashboard --> C[Create instance in the dashboard]
+    C --> D[Upload files or import from Modrinth]
+    D --> E[Set visibility, whitelist, applications]
+    E --> F[Publish a version]
+    B -- Self-hosted --> G[Write instance.json and manifest.json]
+    G --> H[Host them over HTTPS]
+    H --> I[Add _nekolauncher TXT record]
+    F --> J[Players search the name or follow an invite link]
+    I --> K[Players type the domain]
 ```
-
-## 📦 Phase 1 — Create the instance
-
-### 1. Open the Server Search page
-
-Click the **Search Server** button in the top-right corner of the launcher.
-
-![Step 1: Click Search Button](https://cdn.neko-launcher.com/images/create-your-own-instance-step-1.png)
-
-### 2. Start a new instance
-
-In the search window, click the **`+ New Instance`** button in the bottom-right corner.
-
-![Step 2: New Instance Button](https://cdn.neko-launcher.com/images/create-your-own-instance-step-2.png)
-
-### 3. Choose the creation type
-
-Select **Create New**. (If you already have instance data hosted somewhere, choose **Connect to Existing Instance** instead.)
-
-![Step 3: Select Create New Menu](https://cdn.neko-launcher.com/images/create-your-own-instance-step-3.png)
-
-### 4. Fill in the instance details
-
-![Step 4: Fill in Details](https://cdn.neko-launcher.com/images/create-your-own-instance-step-4.png)
-
-- **Instance Name** — the display name players will see.
-- **IP Address** — the domain players connect to (e.g. `play.furi.moe`). This is also where DNS discovery attaches, so use a domain you control.
-- **Icon and Wallpaper** — optional images to brand your instance.
-
-> **Tip:** Double-check everything, then click **Next**.
-
-## 🎒 Phase 2 — Import your modpack
-
-### 5. Drop in your `.mrpack`
-
-Drag and drop the `.mrpack` file you want to ship into the drop zone.
-
-> You can create a `.mrpack` by exporting a modpack from the [Modrinth App](https://modrinth.com/app). Neko Launcher reads the pack and turns it into a manifest of files (each with a URL, size, and **SHA-1** hash) that players download and verify.
-
-![Step 5: Upload mrpack File](https://cdn.neko-launcher.com/images/create-your-own-instance-step-5.png)
-
-## 🔓 Phase 3 — Set edit permissions
-
-### 6. Choose player-editable files (optional)
-
-Mark which files players are allowed to change locally — things like resource packs, keybind configs, or options. Everything else stays managed and gets restored to match your manifest on the next sync. Skip this step if you don't need it.
-
-![Step 6: Set File Permissions](https://cdn.neko-launcher.com/images/create-your-own-instance-step-6.png)
-
-> Under the hood these become the instance's `ignored` paths, so managed files can't be silently overwritten by clients.
-
-## 🚀 Phase 4 — Create & wire up DNS
-
-### 7. Review and create
-
-Click **Next**, review the summary, then click **Create Instance**.
-
-![Step 7: Confirm Creation](https://cdn.neko-launcher.com/images/create-your-own-instance-step-7.png)
-
-### 8. Wait for processing
-
-The launcher builds the instance and uploads its config and manifest. Give it a moment.
-
-![Step 8: Wait for Processing](https://cdn.neko-launcher.com/images/create-your-own-instance-step-8.png)
-
-### 9. Add the DNS TXT record
-
-Neko Launcher discovers instances through a **TXT record** on your domain. Once the build finishes, the wizard shows you the record to add.
-
-You have two options:
-
-- **Manual** — copy the record and add it at your DNS provider.
-- **Auto Configure (Cloudflare)** — if your domain is on Cloudflare, click **Auto Configure** and the launcher writes the record for you.
-
-![Step 9: Configure DNS](https://cdn.neko-launcher.com/images/create-your-own-instance-step-9.png)
-
-The launcher looks up `_nekolauncher.<your-domain>` (falling back to `_alicemagiclauncher.<your-domain>`). A modern **v2** record is `;`-delimited `key=value` pairs — the two that matter most are `instanceUrl` and `manifestUrl`:
-
-```text
-_nekolauncher.play.furi.moe.  IN  TXT  "v=2;instanceUrl=https://cdn.example.com/play/instance.json;manifestUrl=https://cdn.example.com/play/manifest.json"
-```
-
-> `settings=` and `manifest=` are accepted as aliases for `instanceUrl=` and `manifestUrl=`, but the canonical names above are recommended. See [DNS Discovery](../neko-launcher/dns-discovery.md) for every supported key and the legacy pipe format.
-
-> **Note:** DNS changes can take 5–10 minutes to propagate, depending on your provider.
-
-### 10. Confirm the Cloudflare record
-
-If you used **Auto Configure**, the wizard asks you to confirm the record it created before continuing.
-
-![Step 10: Confirm Cloudflare](https://cdn.neko-launcher.com/images/create-your-own-instance-step-10.png)
-
-## ✅ Phase 5 — Go live
-
-### 11. Wait for "Ready to Use"
-
-Once the TXT record resolves, the status flips to **Ready to Use**. If it's still pending, give DNS a few more minutes to propagate.
-
-![Step 11: Ready Status](https://cdn.neko-launcher.com/images/create-your-own-instance-step-11.png)
-
-### 12. Start playing
-
-Hit **Play** on your newly created instance and you're off!
-
-![Step 12: Ready to Play Screen](https://cdn.neko-launcher.com/images/create-your-own-instance-step-12.png)
 
 ---
 
-That's it — enjoy your custom instance, and if you hit any snags, reach out on our [Discord](https://alice-discord.furi.moe). Thanks for using Neko Launcher!
+## Route A — Neko Dashboard
 
-## See Also
+### 1. Sign in and pick a workspace
 
-- [Join with an IP Address](./join-with-ip-address.md) — how players connect to your instance
-- [DNS Discovery](../neko-launcher/dns-discovery.md) — full TXT record reference (keys, aliases, legacy format)
-- [Instance Configuration](../neko-launcher/instance-configuration.md) — the `instance.json` schema
-- [Instance Manifest](../neko-launcher/instance-manifest.md) — the file manifest and SHA-1 hashing
-- [HTTP Headers](../neko-launcher/http-headers.md) — `X-UUID` / `online` headers for access control
-- [Announcements](../neko-launcher/announcement-instance.md) — push notices to players in your instance
+Go to [neko-launcher.com/dashboard](https://neko-launcher.com/dashboard) and sign in with Microsoft. A personal **workspace** on the FREE plan is created for you. Plans decide how many instances, how much storage and how many whitelisted players you get; see [Workspaces and plans](../dashboard/README.md).
+
+### 2. Create the instance
+
+**Instances → New instance.** Give it a display name, a short description, the Minecraft version and the mod loader (Fabric, Forge, Quilt or NeoForge, with a specific build). The instance starts **PRIVATE**: only you can see it until you decide otherwise.
+
+### 3. Add the files
+
+Open the **Files** tab. You can:
+
+- drop a `.mrpack` — the modpack's mods are linked from Modrinth and its overrides are uploaded;
+- upload folders and files (mods, config, resource packs, shader packs) with the file manager;
+- search Modrinth and install mods directly.
+
+Files uploaded through the dashboard are stored privately; Modrinth mods are downloaded by players from Modrinth's CDN. See [Files and versions](../dashboard/files-and-versions.md).
+
+### 4. Decide what players may change
+
+In **Settings**, the **ignored** list names paths the launcher writes once and never overwrites: `options.txt`, `resourcepacks`, `shaderpacks`, `screenshots`, key-bind and HUD configs. Presets exist for common mods. Everything else follows your published version exactly when **read-only** is on.
+
+### 5. Publish a version
+
+Every change is a draft until you **publish a version** (for example `1.0.0`) with a changelog. Players sync to the active version; you can roll back to an earlier one at any time.
+
+### 6. Choose who gets in
+
+Still in **Settings**:
+
+- **Visibility** — `PRIVATE` (whitelist only), `UNLISTED` (anyone with the name), `PUBLIC` (listed in Discover once approved).
+- **Enforce whitelist** — keep a PUBLIC or UNLISTED server visible but lock its files to whitelisted players.
+- **Whitelist** — add players by UUID or name, or let them **apply** through a form; see [Whitelist and applications](../dashboard/whitelist-and-applications.md).
+- **Entry fee** — charge after approval; see [Entry fee](../dashboard/entry-fee.md).
+- **Online mode** — refuse offline accounts.
+- **Hide mods** — keep the modpack's mods out of the `mods` folder on players' machines; see [Instances](../dashboard/instances.md).
+
+### 7. Hand it to players
+
+- **Invite link** — **Invites** tab → create a link `https://neko-launcher.com/j/<code>`. It can expire, be limited to a number of uses, or be revoked.
+- **Name** — players can type the instance name into the launcher's search.
+- **Discover** — request listing; see [Discovery](../dashboard/discovery.md).
+
+---
+
+## Route B — Self-hosted with DNS
+
+Host two files and add one DNS record. The launcher fetches them directly from your server; the Neko API is not involved.
+
+### 1. Write `instance.json`
+
+The instance settings, following [schema v2](../neko-launcher/instance-configuration.md):
+
+```json
+{
+  "$schema": "https://cdn.neko-launcher.com/schema/neko-launcher.json",
+  "name": "my-server",
+  "displayName": "My Server",
+  "description": "Fabric survival with friends.",
+  "icon": "https://cdn.example.com/icon.png",
+  "onlineMode": true,
+  "minecraft": {
+    "version": "1.21.8",
+    "loader": { "type": "fabric", "build": "0.17.3", "enable": true }
+  },
+  "metadata": { "wallpaper": "https://cdn.example.com/wallpaper.webp" },
+  "ignored": ["options.txt", "resourcepacks", "screenshots", "logs"],
+  "readonly": true,
+  "gameArgs": ["--quickPlayMultiplayer=play.example.com"],
+  "socials": [{ "type": "discord", "url": "https://discord.gg/example" }]
+}
+```
+
+### 2. Write `manifest.json`
+
+One entry per file, with a SHA-1 hash, following [manifest schema v2](../neko-launcher/instance-manifest.md):
+
+```json
+[
+  { "path": "mods/fabric-api.jar", "url": "https://cdn.example.com/mods/fabric-api.jar", "size": 2154321, "hash": "3f786850e387550fdab836ed7e6dc881de23001b" },
+  { "path": "config/server.toml", "url": "https://cdn.example.com/config/server.toml", "size": 812, "hash": "89e6c98d92887913cadf06b2adb97f26cde4849b" }
+]
+```
+
+Generate hashes with `sha1sum` (Linux/macOS) or `Get-FileHash -Algorithm SHA1` (PowerShell).
+
+### 3. Host both files over HTTPS
+
+Any static host works: your own web server, an object store, a CDN. Both URLs must be reachable without cookies. Test them:
+
+```bash
+curl -sI https://cdn.example.com/instance.json | head -1
+curl -s https://cdn.example.com/manifest.json | head -c 200
+```
+
+### 4. Add the DNS TXT record
+
+At `_nekolauncher.<your domain>`:
+
+```
+v=2;ip=play.example.com;settings=https://cdn.example.com/instance.json;manifest=https://cdn.example.com/manifest.json
+```
+
+Full key list and provider notes: [DNS discovery](../neko-launcher/dns-discovery.md).
+
+### 5. Test in the launcher
+
+Search for `play.example.com`. A green card means both files were fetched and the instance is installable.
+
+### The launcher's Create wizard
+
+The launcher also has a **Create New** wizard (Search → **+ New instance** → **Create New**) that builds `instance.json` and `manifest.json` from a `.mrpack`, uploads them, and can add the TXT record through Cloudflare for you. The steps are the same as above with the files generated for you:
+
+![Create wizard](https://cdn.neko-launcher.com/images/create-your-own-instance-step-4.png)
+
+---
+
+## Access control on each route
+
+| | Dashboard | Self-hosted |
+|---|---|---|
+| Who may install | Visibility + whitelist + workspace membership, enforced by the API | Your server decides, using the `X-UUID`, `X-Username` and `online` headers the launcher sends |
+| Applications, invite links, entry fee | Built in | Not available |
+| File hosting | Neko storage or Modrinth | Yours |
+| Updates | Publish a version | Change the files, players sync on next launch |
+
+## See also
+
+- [Dashboard guide](../dashboard/README.md)
+- [Instance configuration](../neko-launcher/instance-configuration.md)
+- [HTTP headers](../neko-launcher/http-headers.md)

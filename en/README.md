@@ -1,131 +1,77 @@
 # Neko Launcher Wiki
 
-Welcome to the official documentation hub for **Neko Launcher** — a Minecraft launcher built with Tauri 2 that lets players join curated servers in a couple of clicks, and lets server owners publish their own instances (mods, config, resource packs) over plain HTTP with automatic updates.
+**Neko Launcher** is a Minecraft launcher for curated servers. A player installs a server's modpack in one click and is kept in sync automatically; a server owner publishes and manages that modpack from a web dashboard, decides who may join, and can even collect an entry fee.
 
-This wiki is split into two audiences: **players** who just want to launch and play, and **server owners / developers** who want to distribute a custom instance and gate access to it.
+This wiki has three audiences:
+
+| You are… | Start here |
+|---|---|
+| A **player** who wants to join a server | [Player guide](players/README.md) |
+| A **server owner** who wants to publish a modpack and manage players | [Dashboard guide](dashboard/README.md) |
+| A **developer** integrating with the launcher or hosting an instance yourself | [Technical reference](neko-launcher/README.md) |
 
 ---
 
-## 🗺️ How the ecosystem fits together
+## How it fits together
 
-At a high level, a **server owner** publishes an instance description (config, file manifest) and optionally a DNS record so the launcher can auto-discover it. A **player** points the launcher at that server (or scans it automatically), and the launcher downloads only the files that changed, verifies them, and launches Minecraft with the right mod loader.
+An **instance** is one server's modpack: a description (name, Minecraft version, mod loader, wallpaper, links) plus a **manifest** listing every file with a SHA-1 hash. The launcher downloads only what changed, verifies each file, installs the right loader and starts the game.
+
+There are two ways to publish an instance:
+
+- **Neko Dashboard** (recommended) — upload files at [neko-launcher.com/dashboard](https://neko-launcher.com/dashboard); the API serves the instance, hosts the files, runs the whitelist, applications, invite links and entry fees.
+- **Self-hosted** — host two JSON files anywhere and point a DNS TXT record at them. Players type your domain into the launcher.
 
 ```mermaid
-graph TD
+graph LR
+  subgraph Owner
+    D[Neko Dashboard] --> API[Neko API]
+    H[Self-hosted JSON] --> DNS[DNS TXT record]
+  end
   subgraph Player
-    P[Player] --> L[Neko Launcher]
-    L --> I[Local Instance<br/>mods + config + resource packs]
-    I --> MC[Minecraft + mod loader]
+    L[Neko Launcher]
   end
-
-  subgraph "Server Owner"
-    O[Server Owner] --> DNS["DNS TXT record<br/>_nekolauncher.domain"]
-    O --> CFG[instance.json config]
-    O --> MAN["manifest.json<br/>files + SHA-1 hashes"]
-  end
-
-  L -->|resolve| DNS
-  DNS -->|instanceUrl / manifestUrl| CFG
-  L -->|"fetch (X-UUID + online headers)"| CFG
-  CFG --> MAN
-  MAN -->|download changed files| I
+  API --> L
+  DNS --> L
+  L --> I[Local instance folder]
+  I --> MC[Minecraft with mod loader]
 ```
 
-Every request the launcher makes to a server owner's endpoints carries an `X-UUID` header (the player's Minecraft UUID) and an `online` header (`"true"` for real Microsoft/Xbox accounts, `"false"` for offline), so operators can gate access if they want.
+---
+
+## Player guide
+
+- [Getting started](players/README.md) — install, sign in, find a server, play.
+- [Join a server with an IP address](how-to/join-with-ip-address.md)
+- [Apply to a server and pay an entry fee](how-to/apply-to-a-server.md)
+
+## Dashboard guide
+
+- [Workspaces, plans and members](dashboard/README.md)
+- [Instances and their settings](dashboard/instances.md) — visibility, whitelist, read-only, hidden mods.
+- [Files and versions](dashboard/files-and-versions.md)
+- [Whitelist, applications and invite links](dashboard/whitelist-and-applications.md)
+- [Entry fee](dashboard/entry-fee.md) — PromptPay QR, payment link or bank transfer, verified by slip.
+- [Announcements](dashboard/announcements.md)
+- [Discovery](dashboard/discovery.md) — get listed inside the launcher.
+
+## Technical reference
+
+- [Overview and architecture](neko-launcher/README.md)
+- [Instance configuration](neko-launcher/instance-configuration.md) — schema v2.
+- [Instance manifest](neko-launcher/instance-manifest.md) — schema v2.
+- [DNS discovery](neko-launcher/dns-discovery.md) — self-hosting with a TXT record.
+- [HTTP headers and authentication](neko-launcher/http-headers.md)
+- [Announcement feed](neko-launcher/announcement-instance.md)
+- [Social links](neko-launcher/social-links.md)
+- [Server API](neko-launcher/server-api.md) — whitelist checks for server plugins.
+- [Deep links](neko-launcher/deep-links.md) — `nekolauncher://` and `neko-launcher.com/j/…`.
+- [Create your own instance](how-to/make-your-own-instance.md) — both routes, step by step.
 
 ---
 
-## 🚀 Quick start
+## Downloads and support
 
-### For players
-
-* **[Download Neko Launcher](https://neko-launcher.com)** — grab the installer for your platform.
-* **[Join a server by IP address](./how-to/join-with-ip-address)** — connect to a server in five steps.
-* **[Make your own instance](./how-to/make-your-own-instance)** — set up a personal instance from scratch.
-
-### For server owners & developers
-
-* **[Neko Launcher integration guide](./neko-launcher/)** — the full server-integration overview.
-* **[Instance configuration](./neko-launcher/instance-configuration)** — the `instance.json` schema and every option.
-* **[Instance manifest](./neko-launcher/instance-manifest)** — how files are distributed and verified.
-* **[DNS discovery](./neko-launcher/dns-discovery)** — publish a TXT record so the launcher finds your server automatically.
-* **[HTTP headers](./neko-launcher/http-headers)** — the `X-UUID` / `online` headers and how to gate access.
-* **[Social links](./neko-launcher/social-links)** — surface your Discord, website, and other links in the launcher.
-* **[Announcements](./neko-launcher/announcement-instance)** — push notices, news, and events into the instance.
-
----
-
-## 📚 Documentation sections
-
-### Neko Launcher integration
-
-Everything a server owner needs to publish and maintain an instance.
-
-| Page | What it covers |
-| --- | --- |
-| **[Overview](./neko-launcher/)** | Introduction to server integration |
-| **[Instance configuration](./neko-launcher/instance-configuration)** | `instance.json` fields, loader setup, metadata |
-| **[Instance manifest](./neko-launcher/instance-manifest)** | The `manifest.json` file array + SHA-1 verification |
-| **[DNS discovery](./neko-launcher/dns-discovery)** | Auto-discovery via TXT records |
-| **[HTTP headers](./neko-launcher/http-headers)** | Access gating with `X-UUID` and `online` |
-| **[Social links](./neko-launcher/social-links)** | Community and platform links |
-| **[Announcements](./neko-launcher/announcement-instance)** | Notices, news, and events |
-
-### How-to guides
-
-Short, screenshot-driven walkthroughs.
-
-* **[Join with an IP address](./how-to/join-with-ip-address)**
-* **[Make your own instance](./how-to/make-your-own-instance)**
-
----
-
-## 🔧 What the launcher does
-
-* ✅ Instance management for **Fabric, Forge, Quilt, and NeoForge**
-* ✅ Automatic mod, config, and resource-pack updates via manifest diffing
-* ✅ SHA-1 verification of every downloaded file
-* ✅ DNS-based server auto-discovery
-* ✅ Access gating through per-request auth headers
-* ✅ Microsoft/Xbox and offline account support
-* ✅ Multi-language UI (EN / TH and more)
-* ✅ Light and dark themes
-
-### Supported mod loaders
-
-| Loader | Notes |
-| --- | --- |
-| **Fabric** | Lightweight and modern |
-| **Forge** | Traditional and extensive |
-| **Quilt** | Community-driven Fabric fork |
-| **NeoForge** | Modern Forge alternative |
-
----
-
-## 🌐 Resources
-
-* **[Download / launcher site](https://neko-launcher.com)** — get the app
-* **[Furimoe](https://furi.moe)** — the main project site
-* **[Discord community](https://alice-discord.furi.moe)** — chat, support, and announcements
-* **[GitHub organization](https://github.com/alice-magic)** — source and issue tracking
-* **[Wiki repository](https://github.com/alice-magic/wiki)** — the source for these docs
-
----
-
-## 📖 Contributing
-
-Found a mistake or want to add a page? These docs live on GitHub:
-
-1. Open the **[wiki repository](https://github.com/alice-magic/wiki)**.
-2. Submit an issue or a pull request.
-3. Keep examples real and runnable — every config, DNS record, and header shown here matches what the launcher actually reads.
-
----
-
-## See Also
-
-* [Neko Launcher integration overview](./neko-launcher/)
-* [Instance configuration](./neko-launcher/instance-configuration)
-* [DNS discovery](./neko-launcher/dns-discovery)
-* [How to join with an IP address](./how-to/join-with-ip-address)
-* [How to make your own instance](./how-to/make-your-own-instance)
+- Download: [neko-launcher.com](https://neko-launcher.com)
+- Dashboard: [neko-launcher.com/dashboard](https://neko-launcher.com/dashboard)
+- Support: [neko-launcher.com/support](https://neko-launcher.com/support)
+- This wiki is open source: [github.com/alice-magic/wiki](https://github.com/alice-magic/wiki)

@@ -1,131 +1,77 @@
 # Neko Launcher Wiki
 
-ยินดีต้อนรับสู่ศูนย์กลางเอกสารอย่างเป็นทางการของ **Neko Launcher** — ตัวเปิด Minecraft ที่สร้างด้วย Tauri 2 ซึ่งช่วยให้ผู้เล่นเข้าร่วมเซิร์ฟเวอร์ที่คัดสรรมาแล้วได้ในไม่กี่คลิก และช่วยให้เจ้าของเซิร์ฟเวอร์เผยแพร่อินสแตนซ์ของตัวเอง (มอด, config, รีซอร์สแพ็ก) ผ่าน HTTP ธรรมดาพร้อมการอัปเดตอัตโนมัติ
+**Neko Launcher** คือตัวเปิด Minecraft สำหรับเซิร์ฟเวอร์ที่คัดสรรมาแล้ว ผู้เล่นติดตั้งม็อดแพ็กของเซิร์ฟเวอร์ได้ในคลิกเดียวและได้รับอัปเดตอัตโนมัติ ส่วนเจ้าของเซิร์ฟเวอร์เผยแพร่และจัดการม็อดแพ็กจากแดชบอร์ดบนเว็บ กำหนดว่าใครเข้าได้ และเก็บค่าเข้าเซิร์ฟเวอร์ได้ด้วย
 
-วิกินี้แบ่งออกเป็นสองกลุ่มผู้อ่าน: **ผู้เล่น** ที่แค่ต้องการเปิดเกมและเล่น และ **เจ้าของเซิร์ฟเวอร์ / นักพัฒนา** ที่ต้องการแจกจ่ายอินสแตนซ์แบบกำหนดเองและควบคุมการเข้าถึงอินสแตนซ์นั้น
+วิกินี้แบ่งเป็นสามกลุ่มผู้อ่าน:
+
+| คุณคือ… | เริ่มที่ |
+|---|---|
+| **ผู้เล่น** ที่อยากเข้าเซิร์ฟเวอร์ | [คู่มือผู้เล่น](players/README.md) |
+| **เจ้าของเซิร์ฟเวอร์** ที่อยากเผยแพร่ม็อดแพ็กและจัดการผู้เล่น | [คู่มือแดชบอร์ด](dashboard/README.md) |
+| **นักพัฒนา** ที่ต้องการเชื่อมต่อกับตัวเปิดหรือโฮสต์อินสแตนซ์เอง | [เอกสารอ้างอิงทางเทคนิค](neko-launcher/README.md) |
 
 ---
 
-## 🗺️ ระบบนิเวศทำงานร่วมกันอย่างไร
+## ภาพรวมการทำงาน
 
-ในภาพรวม **เจ้าของเซิร์ฟเวอร์** จะเผยแพร่คำอธิบายอินสแตนซ์ (config, ไฟล์ manifest) และอาจเผยแพร่ DNS record เพื่อให้ตัวเปิดค้นพบอินสแตนซ์ได้โดยอัตโนมัติ ส่วน **ผู้เล่น** จะชี้ตัวเปิดไปยังเซิร์ฟเวอร์นั้น (หรือให้ตัวเปิดสแกนหาโดยอัตโนมัติ) แล้วตัวเปิดจะดาวน์โหลดเฉพาะไฟล์ที่มีการเปลี่ยนแปลง ตรวจสอบความถูกต้อง และเปิด Minecraft ด้วยมอดโหลดเดอร์ที่ถูกต้อง
+**อินสแตนซ์** คือม็อดแพ็กของเซิร์ฟเวอร์หนึ่ง ประกอบด้วยคำอธิบาย (ชื่อ เวอร์ชัน Minecraft ม็อดโหลดเดอร์ วอลเปเปอร์ ลิงก์) และ **manifest** ที่ระบุทุกไฟล์พร้อมค่า SHA-1 ตัวเปิดจะดาวน์โหลดเฉพาะไฟล์ที่เปลี่ยน ตรวจสอบทุกไฟล์ ติดตั้งโหลดเดอร์ที่ถูกต้อง แล้วเปิดเกม
+
+เผยแพร่อินสแตนซ์ได้สองทาง:
+
+- **Neko Dashboard** (แนะนำ) — อัปโหลดไฟล์ที่ [neko-launcher.com/dashboard](https://neko-launcher.com/dashboard) API จะเป็นผู้ให้บริการอินสแตนซ์ โฮสต์ไฟล์ จัดการไวต์ลิสต์ ใบสมัคร ลิงก์เชิญ และค่าเข้าเซิร์ฟเวอร์
+- **โฮสต์เอง** — วางไฟล์ JSON สองไฟล์ที่ไหนก็ได้ แล้วชี้ DNS TXT record ไปที่ไฟล์นั้น ผู้เล่นพิมพ์โดเมนของคุณในตัวเปิด
 
 ```mermaid
-graph TD
+graph LR
+  subgraph Owner
+    D[Neko Dashboard] --> API[Neko API]
+    H[JSON ที่โฮสต์เอง] --> DNS[DNS TXT record]
+  end
   subgraph Player
-    P[Player] --> L[Neko Launcher]
-    L --> I[Local Instance<br/>mods + config + resource packs]
-    I --> MC[Minecraft + mod loader]
+    L[Neko Launcher]
   end
-
-  subgraph "Server Owner"
-    O[Server Owner] --> DNS["DNS TXT record<br/>_nekolauncher.domain"]
-    O --> CFG[instance.json config]
-    O --> MAN["manifest.json<br/>files + SHA-1 hashes"]
-  end
-
-  L -->|resolve| DNS
-  DNS -->|instanceUrl / manifestUrl| CFG
-  L -->|"fetch (X-UUID + online headers)"| CFG
-  CFG --> MAN
-  MAN -->|download changed files| I
+  API --> L
+  DNS --> L
+  L --> I[โฟลเดอร์อินสแตนซ์ในเครื่อง]
+  I --> MC[Minecraft พร้อมม็อดโหลดเดอร์]
 ```
 
-ทุกคำขอที่ตัวเปิดส่งไปยัง endpoint ของเจ้าของเซิร์ฟเวอร์จะแนบ header `X-UUID` (Minecraft UUID ของผู้เล่น) และ header `online` (`"true"` สำหรับบัญชี Microsoft/Xbox จริง และ `"false"` สำหรับบัญชี offline) มาด้วยเสมอ เพื่อให้ผู้ดูแลระบบสามารถควบคุมการเข้าถึงได้หากต้องการ
+---
+
+## คู่มือผู้เล่น
+
+- [เริ่มต้นใช้งาน](players/README.md) — ติดตั้ง เข้าสู่ระบบ หาเซิร์ฟเวอร์ เล่น
+- [เข้าเซิร์ฟเวอร์ด้วย IP address](how-to/join-with-ip-address.md)
+- [สมัครเข้าเซิร์ฟเวอร์และชำระค่าเข้า](how-to/apply-to-a-server.md)
+
+## คู่มือแดชบอร์ด
+
+- [เวิร์กสเปซ แพ็กเกจ และสมาชิก](dashboard/README.md)
+- [อินสแตนซ์และการตั้งค่า](dashboard/instances.md) — การมองเห็น ไวต์ลิสต์ อ่านอย่างเดียว ซ่อนม็อด
+- [ไฟล์และเวอร์ชัน](dashboard/files-and-versions.md)
+- [ไวต์ลิสต์ ใบสมัคร และลิงก์เชิญ](dashboard/whitelist-and-applications.md)
+- [ค่าเข้าเซิร์ฟเวอร์](dashboard/entry-fee.md) — PromptPay QR ลิงก์ชำระเงิน หรือโอนธนาคาร ยืนยันด้วยสลิป
+- [ประกาศ](dashboard/announcements.md)
+- [Discovery](dashboard/discovery.md) — ขึ้นรายชื่อในตัวเปิด
+
+## เอกสารอ้างอิงทางเทคนิค
+
+- [ภาพรวมและสถาปัตยกรรม](neko-launcher/README.md)
+- [การตั้งค่าอินสแตนซ์](neko-launcher/instance-configuration.md) — schema v2
+- [Manifest ของอินสแตนซ์](neko-launcher/instance-manifest.md) — schema v2
+- [DNS discovery](neko-launcher/dns-discovery.md) — โฮสต์เองด้วย TXT record
+- [HTTP header และการยืนยันตัวตน](neko-launcher/http-headers.md)
+- [ฟีดประกาศ](neko-launcher/announcement-instance.md)
+- [ลิงก์โซเชียล](neko-launcher/social-links.md)
+- [Server API](neko-launcher/server-api.md) — ตรวจไวต์ลิสต์จากปลั๊กอินเซิร์ฟเวอร์
+- [Deep link](neko-launcher/deep-links.md) — `nekolauncher://` และ `neko-launcher.com/j/…`
+- [สร้างอินสแตนซ์ของคุณเอง](how-to/make-your-own-instance.md) — ทั้งสองทาง ทีละขั้น
 
 ---
 
-## 🚀 เริ่มต้นอย่างรวดเร็ว
+## ดาวน์โหลดและการสนับสนุน
 
-### สำหรับผู้เล่น
-
-* **[ดาวน์โหลด Neko Launcher](https://neko-launcher.com)** — ดาวน์โหลดตัวติดตั้งสำหรับแพลตฟอร์มของคุณ
-* **[เข้าร่วมเซิร์ฟเวอร์ด้วยที่อยู่ IP](./how-to/join-with-ip-address)** — เชื่อมต่อกับเซิร์ฟเวอร์ใน 5 ขั้นตอน
-* **[สร้างอินสแตนซ์ของคุณเอง](./how-to/make-your-own-instance)** — ตั้งค่าอินสแตนซ์ส่วนตัวตั้งแต่ต้น
-
-### สำหรับเจ้าของเซิร์ฟเวอร์และนักพัฒนา
-
-* **[คู่มือการผสานรวม Neko Launcher](./neko-launcher/)** — ภาพรวมการผสานรวมกับเซิร์ฟเวอร์แบบครบถ้วน
-* **[การกำหนดค่าอินสแตนซ์](./neko-launcher/instance-configuration)** — schema ของ `instance.json` และทุกตัวเลือก
-* **[Instance manifest](./neko-launcher/instance-manifest)** — วิธีแจกจ่ายและตรวจสอบไฟล์
-* **[DNS discovery](./neko-launcher/dns-discovery)** — เผยแพร่ TXT record เพื่อให้ตัวเปิดค้นพบเซิร์ฟเวอร์ของคุณโดยอัตโนมัติ
-* **[HTTP headers](./neko-launcher/http-headers)** — header `X-UUID` / `online` และวิธีควบคุมการเข้าถึง
-* **[ลิงก์โซเชียล](./neko-launcher/social-links)** — แสดง Discord, เว็บไซต์ และลิงก์อื่นๆ ของคุณในตัวเปิด
-* **[ประกาศ](./neko-launcher/announcement-instance)** — ส่งประกาศ ข่าวสาร และกิจกรรมเข้าไปในอินสแตนซ์
-
----
-
-## 📚 หมวดหมู่เอกสาร
-
-### การผสานรวม Neko Launcher
-
-ทุกสิ่งที่เจ้าของเซิร์ฟเวอร์ต้องรู้เพื่อเผยแพร่และดูแลอินสแตนซ์
-
-| หน้า | ครอบคลุมเรื่อง |
-| --- | --- |
-| **[ภาพรวม](./neko-launcher/)** | แนะนำการผสานรวมกับเซิร์ฟเวอร์ |
-| **[การกำหนดค่าอินสแตนซ์](./neko-launcher/instance-configuration)** | ฟิลด์ของ `instance.json`, การตั้งค่าโหลดเดอร์, เมทาดาทา |
-| **[Instance manifest](./neko-launcher/instance-manifest)** | อาร์เรย์ไฟล์ใน `manifest.json` + การตรวจสอบด้วย SHA-1 |
-| **[DNS discovery](./neko-launcher/dns-discovery)** | การค้นพบอัตโนมัติผ่าน TXT record |
-| **[HTTP headers](./neko-launcher/http-headers)** | การควบคุมการเข้าถึงด้วย `X-UUID` และ `online` |
-| **[ลิงก์โซเชียล](./neko-launcher/social-links)** | ลิงก์ชุมชนและแพลตฟอร์ม |
-| **[ประกาศ](./neko-launcher/announcement-instance)** | ประกาศ ข่าวสาร และกิจกรรม |
-
-### คู่มือแบบทำตามทีละขั้น
-
-คู่มือสั้นๆ พร้อมภาพประกอบ
-
-* **[เข้าร่วมด้วยที่อยู่ IP](./how-to/join-with-ip-address)**
-* **[สร้างอินสแตนซ์ของคุณเอง](./how-to/make-your-own-instance)**
-
----
-
-## 🔧 ตัวเปิดทำอะไรได้บ้าง
-
-* ✅ การจัดการอินสแตนซ์สำหรับ **Fabric, Forge, Quilt และ NeoForge**
-* ✅ การอัปเดตมอด, config และรีซอร์สแพ็กอัตโนมัติผ่านการเปรียบเทียบ manifest
-* ✅ การตรวจสอบทุกไฟล์ที่ดาวน์โหลดด้วย SHA-1
-* ✅ การค้นพบเซิร์ฟเวอร์อัตโนมัติผ่าน DNS
-* ✅ การควบคุมการเข้าถึงผ่าน auth header ในแต่ละคำขอ
-* ✅ รองรับบัญชี Microsoft/Xbox และบัญชี offline
-* ✅ UI หลายภาษา (EN / TH และอื่นๆ)
-* ✅ ธีมสว่างและมืด
-
-### Mod loader ที่รองรับ
-
-| โหลดเดอร์ | หมายเหตุ |
-| --- | --- |
-| **Fabric** | เบาและทันสมัย |
-| **Forge** | แบบดั้งเดิมและครอบคลุม |
-| **Quilt** | Fork ของ Fabric ที่ขับเคลื่อนโดยชุมชน |
-| **NeoForge** | ทางเลือกสมัยใหม่ของ Forge |
-
----
-
-## 🌐 แหล่งข้อมูล
-
-* **[เว็บไซต์ดาวน์โหลด / ตัวเปิด](https://neko-launcher.com)** — ดาวน์โหลดแอป
-* **[Furimoe](https://furi.moe)** — เว็บไซต์หลักของโปรเจกต์
-* **[ชุมชน Discord](https://alice-discord.furi.moe)** — พูดคุย ขอความช่วยเหลือ และรับประกาศ
-* **[องค์กร GitHub](https://github.com/alice-magic)** — ซอร์สโค้ดและการติดตามปัญหา
-* **[Wiki repository](https://github.com/alice-magic/wiki)** — ที่มาของเอกสารเหล่านี้
-
----
-
-## 📖 การมีส่วนร่วม
-
-พบข้อผิดพลาดหรืออยากเพิ่มหน้าใหม่? เอกสารเหล่านี้อยู่บน GitHub:
-
-1. เปิด **[wiki repository](https://github.com/alice-magic/wiki)**
-2. ส่ง issue หรือ pull request
-3. ให้ตัวอย่างเป็นของจริงและใช้งานได้จริง — ทุก config, DNS record และ header ที่แสดงไว้ตรงกับสิ่งที่ตัวเปิดอ่านจริง
-
----
-
-## ดูเพิ่มเติม
-
-* [ภาพรวมการผสานรวม Neko Launcher](./neko-launcher/)
-* [การกำหนดค่าอินสแตนซ์](./neko-launcher/instance-configuration)
-* [DNS discovery](./neko-launcher/dns-discovery)
-* [วิธีเข้าร่วมด้วยที่อยู่ IP](./how-to/join-with-ip-address)
-* [วิธีสร้างอินสแตนซ์ของคุณเอง](./how-to/make-your-own-instance)
+- ดาวน์โหลด: [neko-launcher.com](https://neko-launcher.com)
+- แดชบอร์ด: [neko-launcher.com/dashboard](https://neko-launcher.com/dashboard)
+- ซัพพอร์ต: [neko-launcher.com/support](https://neko-launcher.com/support)
+- วิกินี้เป็นโอเพนซอร์ส: [github.com/alice-magic/wiki](https://github.com/alice-magic/wiki)
