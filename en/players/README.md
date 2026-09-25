@@ -51,6 +51,10 @@ Open the gear icon:
 - **Close to tray**, **Discord Rich Presence**, update channel (stable / beta).
 - **Per-instance settings** — right-click an instance for its folder, files, shortcut on the desktop and version history.
 
+## Your own instances and modpacks
+
+Press **+** at the bottom of the sidebar to browse modpacks from Modrinth, CurseForge, FTB and ATLauncher, import a `.mrpack` or CurseForge `.zip`, or create an empty instance with any Minecraft version and loader. See [Local instances and modpacks](local-instances.md).
+
 ## Troubleshooting
 
 | Symptom | What to check |
