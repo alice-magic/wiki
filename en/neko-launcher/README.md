@@ -53,6 +53,7 @@ Both may be self-hosted and discovered through [DNS](dns-discovery.md). The laun
 - [Social links](social-links.md)
 - [Server API](server-api.md)
 - [Deep links](deep-links.md)
+- [MCP server](mcp-server.md)
 
 ## Public API routes used by the launcher
 

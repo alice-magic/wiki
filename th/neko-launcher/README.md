@@ -53,6 +53,7 @@ graph TD
 - [ลิงก์โซเชียล](social-links.md)
 - [Server API](server-api.md)
 - [Deep link](deep-links.md)
+- [MCP server](mcp-server.md)
 
 ## Route สาธารณะที่ตัวเปิดใช้
 

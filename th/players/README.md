@@ -51,6 +51,10 @@
 - **ปิดไปที่ tray**, **Discord Rich Presence**, ช่องอัปเดต (stable / beta)
 - **ตั้งค่ารายอินสแตนซ์** — คลิกขวาที่อินสแตนซ์เพื่อเปิดโฟลเดอร์ ไฟล์ สร้างทางลัดบนเดสก์ท็อป และดูประวัติเวอร์ชัน
 
+## Instance ของคุณเองและ modpack
+
+กด **+** ด้านล่างของแถบด้านข้างเพื่อค้นหา modpack จาก Modrinth, CurseForge, FTB และ ATLauncher นำเข้าไฟล์ `.mrpack` หรือ `.zip` ของ CurseForge หรือสร้าง instance เปล่าด้วย Minecraft และ loader เวอร์ชันไหนก็ได้ ดู [Instance ในเครื่องและ modpack](local-instances.md)
+
 ## แก้ปัญหา
 
 | อาการ | ตรวจสอบ |
