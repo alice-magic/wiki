@@ -52,6 +52,7 @@ graph TD
 - [ฟีดประกาศ](announcement-instance.md)
 - [ลิงก์โซเชียล](social-links.md)
 - [Server API](server-api.md)
+- [Whitelist API และ Webhook](whitelist-api.md)
 - [Deep link](deep-links.md)
 - [MCP server](mcp-server.md)
 
