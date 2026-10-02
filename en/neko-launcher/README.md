@@ -52,6 +52,7 @@ Both may be self-hosted and discovered through [DNS](dns-discovery.md). The laun
 - [Announcement feed](announcement-instance.md)
 - [Social links](social-links.md)
 - [Server API](server-api.md)
+- [Whitelist API and webhook](whitelist-api.md)
 - [Deep links](deep-links.md)
 
 ## Public API routes used by the launcher
