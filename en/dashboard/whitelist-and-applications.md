@@ -10,7 +10,7 @@ How players get access to a locked instance: you add them, they apply, or they f
 
 The type is detected from what you type: a UUID (with or without dashes) is matched by UUID, anything else by username. An entry can **expire**: pick a date when adding, or use the calendar button on an entry. Tick several entries to **set expiry** or **remove** them together. Expired entries stay in the list but no longer grant access or count toward the limit.
 
-A **webhook** can notify your own service whenever a player is added, their expiry changes or they are removed. Routes, payloads and MCP tools are in [Whitelist API and webhook](../neko-launcher/whitelist-api.md).
+**Webhooks** (dashboard **Developer → Webhooks**) notify your own service whenever a player is added, their expiry changes or they are removed, and on application and payment events. Routes, payloads, signatures and MCP tools are in [Whitelist API and webhooks](../neko-launcher/whitelist-api.md).
 
 Whitelist entries count toward the workspace plan's limit. Applications approved through the form create entries here too, so one list is the source of truth for your Minecraft server plugin as well; see [Server API](../neko-launcher/server-api.md).
 
